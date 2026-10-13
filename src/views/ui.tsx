@@ -86,7 +86,7 @@ export function IconButton({
       disabled={disabled}
       loading={loading}
       danger={danger}
-      className="h-9 w-9 border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-sm hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+      className="h-9 w-9 border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-xs hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
     >
       {children}
     </Button>
@@ -164,7 +164,7 @@ export function ConfirmDialog({
           onCancel();
         }
       }}
-      className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-xl bg-transparent p-0 backdrop:bg-slate-950/60 backdrop:backdrop-blur-sm"
+      className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-xl bg-transparent p-0 backdrop:bg-slate-950/60 backdrop:backdrop-blur-xs"
     >
       <div className="w-full max-w-md rounded-lg border border-line bg-white dark:bg-slate-900 shadow-panel">
         <div className="flex items-start gap-3 border-b border-line px-4 py-4">
@@ -207,7 +207,7 @@ export function ConfirmDialog({
 
 export function CopyButton({ value, title }: { value: string; title: string }) {
   const [state, setState] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
-  const timeout = useRef<ReturnType<typeof setTimeout>>();
+  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(timeout.current), []);
   async function copy(event: React.MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();

@@ -102,7 +102,7 @@ export function StorageView() {
         </IconButton>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
         <form
           onSubmit={submit}
           noValidate
@@ -140,7 +140,7 @@ export function StorageView() {
 
       <ErrorNotice message={error} />
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-line text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

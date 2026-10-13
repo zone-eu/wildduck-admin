@@ -1,16 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-50: #ecfdf8;
+  --color-brand-100: #d1faee;
+  --color-brand-500: #0f766e;
+  --color-brand-600: #0b625d;
+  --color-brand-700: #0a4f4b;
+  --shadow-panel: 0 10px 24px rgba(23, 32, 51, 0.08);
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Sora', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-ink: rgb(var(--surface-ink));
+  --color-mist: rgb(var(--surface-mist));
+  --color-line: rgb(var(--surface-line));
+}
 
 @layer base {
   :root {
-    --color-ink: 23 32 51;
-    --color-mist: 245 247 251;
-    --color-line: 220 227 237;
+    --surface-ink: 23 32 51;
+    --surface-mist: 245 247 251;
+    --surface-line: 220 227 237;
     --color-surface: 255 255 255;
     color-scheme: light;
-    color: rgb(var(--color-ink));
-    background: rgb(var(--color-mist));
+    color: rgb(var(--surface-ink));
+    background: rgb(var(--surface-mist));
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -18,9 +35,9 @@
   }
 
   :root.dark {
-    --color-ink: 226 232 240;
-    --color-mist: 2 6 23;
-    --color-line: 51 65 85;
+    --surface-ink: 226 232 240;
+    --surface-mist: 2 6 23;
+    --surface-line: 51 65 85;
     --color-surface: 15 23 42;
     color-scheme: dark;
   }
@@ -29,13 +46,22 @@
   select,
   textarea {
     background-color: rgb(var(--color-surface));
-    color: rgb(var(--color-ink));
+    color: rgb(var(--surface-ink));
   }
 
   body {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
+  }
+
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  dialog {
+    margin: auto;
   }
 
   button,
@@ -81,11 +107,11 @@
 
 @layer components {
   .input {
-    @apply h-10 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    @apply h-10 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
   }
 
   .checkbox {
-    @apply h-4 w-4 rounded border-line text-brand-600 focus:ring-brand-500;
+    @apply h-4 w-4 rounded-sm border-line text-brand-600 focus:ring-brand-500;
   }
 
   .toast-notice {

@@ -48,7 +48,7 @@ function DomainAccessList({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
           <Icon className="h-4 w-4 text-brand-600 dark:text-teal-300" />
@@ -183,7 +183,7 @@ export function DomainAccessView() {
         </IconButton>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
         <form onSubmit={submitTag} noValidate className="flex flex-col gap-2 sm:flex-row">
           <div className="min-w-0 flex-1">
             <Field label="Tag">

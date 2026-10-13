@@ -142,6 +142,8 @@ Tests exercise salted password hashing, the hash CLI, startup validation, login/
 
 Run `npm run format` to format the source, server, scripts, and tests with Prettier. The frontend uses two-space indentation. CommonJS server files, scripts, and tests use four spaces. `src/vite-env.d.ts` loads Vite's client types so TypeScript recognizes CSS and other asset imports.
 
+Tailwind CSS 4 is compiled through `@tailwindcss/postcss`. Theme colors, fonts, shadows, and the class-based dark variant are defined in `src/styles.css` using `@theme` and `@custom-variant`. Edit that stylesheet to customize the theme; there is no separate Tailwind configuration file.
+
 ## License
 
 WildDuck Admin UI is licensed under the European Union Public License 1.2 or later, following [WildDuck's licensing](https://github.com/zone-eu/wildduck#license).

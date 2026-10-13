@@ -174,7 +174,7 @@ function LoginScreen({ onLogin }: { onLogin: (session: SessionResponse) => void 
             <input
               value={username}
               onChange={event => setUsername(event.target.value)}
-              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
               autoComplete="username"
             />
           </label>
@@ -186,7 +186,7 @@ function LoginScreen({ onLogin }: { onLogin: (session: SessionResponse) => void 
               value={password}
               onChange={event => setPassword(event.target.value)}
               type="password"
-              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
               autoComplete="current-password"
             />
           </label>
@@ -259,7 +259,7 @@ function Shell({
             type="button"
             aria-current={view === item.id ? 'page' : undefined}
             onClick={() => onView(item.id)}
-            className={`inline-flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition lg:w-full ${view === item.id ? 'bg-brand-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-teal-950 hover:text-brand-700 dark:hover:text-teal-300'}`}
+            className={`inline-flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition lg:w-full ${view === item.id ? 'bg-brand-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-teal-950 hover:text-brand-700 dark:hover:text-teal-300'}`}
           >
             <Icon className="h-4 w-4 shrink-0" />
             {item.label}
@@ -275,7 +275,7 @@ function Shell({
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-20 border-b border-line bg-white/95 dark:bg-slate-900/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-line bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm">
         <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <img
@@ -417,7 +417,7 @@ function UsersView({
       {showCreate ? <CreateUserForm onCreated={onCreated} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="border-b border-line p-4">
             <form onSubmit={submitSearch} className="flex gap-2">
               <div className="relative min-w-0 flex-1">
@@ -426,7 +426,7 @@ function UsersView({
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="Username or address"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
                 />
               </div>
               <Button
@@ -611,7 +611,7 @@ function CreateUserForm({ onCreated }: { onCreated: (id: string) => void }) {
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
     >
       <div className="grid gap-3 md:grid-cols-5">
         <Field label="Username">
@@ -660,7 +660,7 @@ function CreateUserForm({ onCreated }: { onCreated: (id: string) => void }) {
             type="checkbox"
             checked={requirePasswordChange}
             onChange={event => setRequirePasswordChange(event.target.checked)}
-            className="h-4 w-4 rounded border-line text-brand-600 dark:text-teal-300 focus:ring-brand-500"
+            className="h-4 w-4 rounded-sm border-line text-brand-600 dark:text-teal-300 focus:ring-brand-500"
           />
           Require password change
         </label>
@@ -902,7 +902,7 @@ function UserDetailPanel({
 
   return (
     <aside className="space-y-4">
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate font-display text-lg font-semibold">{user.username}</h3>
@@ -948,7 +948,7 @@ function UserDetailPanel({
       <form
         onSubmit={saveUser}
         noValidate
-        className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+        className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
       >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -1078,7 +1078,7 @@ function UserDetailPanel({
         </div>
       </form>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <Mail className="h-4 w-4 text-brand-600 dark:text-teal-300" />
           <h3 className="font-semibold">Addresses</h3>
@@ -1290,7 +1290,7 @@ function DkimView({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="border-b border-line p-4">
             <form onSubmit={submitSearch} className="flex gap-2">
               <div className="relative min-w-0 flex-1">
@@ -1299,7 +1299,7 @@ function DkimView({
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="Domain"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
                 />
               </div>
               <Button
@@ -1440,7 +1440,7 @@ function DkimCreateForm({ onCreate }: { onCreate: (input: DkimCreateInput) => Pr
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
         <KeyRound className="h-4 w-4 text-brand-600 dark:text-teal-300" />
@@ -1473,7 +1473,7 @@ function DkimCreateForm({ onCreate }: { onCreate: (input: DkimCreateInput) => Pr
           <textarea
             value={privateKey}
             onChange={event => setPrivateKey(event.target.value)}
-            className="min-h-28 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="min-h-28 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
           />
         </Field>
       </div>
@@ -1534,7 +1534,7 @@ function DkimDetailPanel({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
       <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div className="min-w-0">
           <h3 className="truncate font-display text-lg font-semibold">{selectedKey.domain}</h3>
@@ -1736,7 +1736,7 @@ function EditableSettingValue({
           title="Save setting"
           aria-label={`Save ${setting.key}`}
           disabled={!dirty || saving}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-sm transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-xs transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
         </Button>
@@ -1810,7 +1810,7 @@ function SettingsView({
         </IconButton>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
         <div className="border-b border-line p-4">
           <div className="flex gap-2">
             <div className="relative min-w-0 flex-1">
@@ -1820,7 +1820,7 @@ function SettingsView({
                 onChange={event => setFilter(event.target.value)}
                 placeholder="Search settings by key or description"
                 aria-label="Search settings"
-                className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
               />
             </div>
             {filter ? (

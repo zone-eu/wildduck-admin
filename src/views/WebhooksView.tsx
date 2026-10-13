@@ -61,7 +61,7 @@ function WebhookCreateForm({
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
         <WebhookIcon className="h-4 w-4 text-brand-600 dark:text-teal-300" />
@@ -191,7 +191,7 @@ export function WebhooksView() {
       <ErrorNotice message={error} />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="border-b border-line p-4">
             <form
               onSubmit={submitSearch}
@@ -203,7 +203,7 @@ export function WebhooksView() {
                   value={type}
                   onChange={event => setType(event.target.value)}
                   placeholder="Event type"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
                 />
               </div>
               <input
