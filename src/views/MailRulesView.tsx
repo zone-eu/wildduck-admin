@@ -25,7 +25,7 @@ const emptyReply: AutoreplyInput = {
 const emptyFilter = (): FilterInput => ({ name: '', disabled: false, query: {}, action: {} });
 const button =
   'inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50';
-const panel = 'rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-sm';
+const panel = 'rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs';
 const errorMessage = (err: unknown) => (err instanceof Error ? err.message : 'Request failed');
 
 export function MailRulesView() {

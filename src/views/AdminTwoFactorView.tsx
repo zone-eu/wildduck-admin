@@ -304,7 +304,7 @@ export function AdminSecuritySettings({
     status.credentials.length === 1;
 
   return (
-    <section className="space-y-5 rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-sm">
+    <section className="space-y-5 rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-xl font-semibold">

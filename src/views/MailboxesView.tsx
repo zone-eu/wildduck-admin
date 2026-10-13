@@ -49,7 +49,7 @@ function MailboxForm({ userId, onSaved }: { userId: string; onSaved: () => Promi
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
         <Plus className="h-4 w-4 text-brand-600 dark:text-teal-300" />
@@ -180,7 +180,7 @@ function MailboxDetail({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
       <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div className="min-w-0">
           <h3 className="break-all font-display text-lg font-semibold">{mailbox.path}</h3>
@@ -326,7 +326,7 @@ export function MailboxesView() {
         </IconButton>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
         <form onSubmit={submit} noValidate className="flex flex-col gap-2 sm:flex-row">
           <div className="min-w-0 flex-1">
             <Field label="User ID">
@@ -352,7 +352,7 @@ export function MailboxesView() {
       <ErrorNotice message={error} />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

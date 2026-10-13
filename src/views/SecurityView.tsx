@@ -122,7 +122,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
         </IconButton>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
         <form
           onSubmit={submit}
           noValidate
@@ -165,7 +165,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
 
       <div className="grid gap-4 xl:grid-cols-[390px_minmax(0,1fr)]">
         <aside className="space-y-4">
-          <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm">
+          <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
             <div className="mb-3 flex items-center gap-2">
               <Shield className="h-4 w-4 text-brand-600 dark:text-teal-300" />
               <h3 className="font-semibold">User actions</h3>
@@ -222,7 +222,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
           </div>
 
           {tempPassword ? (
-            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 text-sm text-amber-900 dark:text-amber-200 shadow-sm">
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 text-sm text-amber-900 dark:text-amber-200 shadow-xs">
               <div className="mb-2 font-semibold">Temporary password</div>
               <div className="flex items-center gap-2">
                 <code className="min-w-0 flex-1 break-all rounded-lg bg-white dark:bg-slate-900 px-3 py-2 text-xs">
@@ -234,7 +234,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
           ) : null}
 
           {quotaResult ? (
-            <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 text-sm shadow-sm">
+            <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 text-sm shadow-xs">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                 Quota recalculated
               </div>
@@ -243,7 +243,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
           ) : null}
         </aside>
 
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-line text-sm">
               <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">

@@ -101,7 +101,7 @@ function CertCreateForm({ onSave }: { onSave: (input: TlsCertificateInput) => Pr
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-sm"
+      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
         <KeyRound className="h-4 w-4 text-brand-600 dark:text-teal-300" />
@@ -136,21 +136,21 @@ function CertCreateForm({ onSave }: { onSave: (input: TlsCertificateInput) => Pr
           <textarea
             value={privateKey}
             onChange={event => setPrivateKey(event.target.value)}
-            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
           />
         </Field>
         <Field label="Certificate">
           <textarea
             value={cert}
             onChange={event => setCert(event.target.value)}
-            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
           />
         </Field>
         <Field label="CA chain">
           <textarea
             value={ca}
             onChange={event => setCa(event.target.value)}
-            className="min-h-20 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="min-h-20 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
           />
         </Field>
         <ErrorNotice message={error} />
@@ -206,7 +206,7 @@ function CertDetailPanel({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
       <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
         <div className="min-w-0">
           <h3 className="break-all font-display text-lg font-semibold">{selected.servername}</h3>
@@ -417,7 +417,7 @@ export function CertsView() {
       <ErrorNotice message={error} />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-sm">
+        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
           <div className="border-b border-line p-4">
             <form onSubmit={submitSearch} className="space-y-3">
               <div className="flex gap-2">
@@ -427,7 +427,7 @@ export function CertsView() {
                     value={query}
                     onChange={event => setQuery(event.target.value)}
                     placeholder="Server name"
-                    className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                    className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
                   />
                 </div>
                 <Button

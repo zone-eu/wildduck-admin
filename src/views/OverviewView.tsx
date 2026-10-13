@@ -205,7 +205,7 @@ export function OverviewView({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2" aria-busy={refreshing}>
-        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
           <div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             {refreshing ? (
               <LoaderCircle className="h-5 w-5 animate-spin" />
@@ -242,7 +242,7 @@ export function OverviewView({
             {session.api.url}
           </p>
         </div>
-        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-sm">
+        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
           <div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             <Users className="h-5 w-5" />
             Total accounts
@@ -276,7 +276,7 @@ export function OverviewView({
       </div>
 
       <section
-        className="rounded-xl border border-line bg-white dark:bg-slate-900 shadow-sm"
+        className="rounded-xl border border-line bg-white dark:bg-slate-900 shadow-xs"
         aria-labelledby="attention-heading"
       >
         <div className="border-b border-line px-5 py-4">
@@ -343,7 +343,7 @@ export function OverviewView({
               type="button"
               align="start"
               onClick={action.onClick}
-              className="gap-3 border border-line bg-white dark:bg-slate-900 p-4 text-left shadow-sm hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-teal-950"
+              className="gap-3 border border-line bg-white dark:bg-slate-900 p-4 text-left shadow-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-teal-950"
             >
               <action.icon className="h-5 w-5 shrink-0 text-brand-600 dark:text-teal-300" />
               <span className="min-w-0">
