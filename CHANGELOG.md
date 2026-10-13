@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/zone-eu/wildduck-admin/compare/v0.1.1...v0.1.2) (2026-10-13)
+
+
+### Bug Fixes
+
+* migrate to tailwind v4 ([#3](https://github.com/zone-eu/wildduck-admin/issues/3)) ([5465621](https://github.com/zone-eu/wildduck-admin/commit/5465621adf9518e6e6c3b74aa4268894863ad60e))
+
 ## [0.1.1](https://github.com/zone-eu/wildduck-admin/compare/v0.1.0...v0.1.1) (2026-10-13)
 
 
