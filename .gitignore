@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+# Keep deployment configuration private; commit only defaults and examples.
+config/*
+!config/default.toml
+!config/*.example.toml
+.codex/
+.agents/
+.aws/
+.DS_Store
+npm-debug.log*
+*.log
+*.tsbuildinfo
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.key
+*.key
+*.pem
+*.p12
+*.pfx

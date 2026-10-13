@@ -1,0 +1,47 @@
+name = "WildDuck Admin UI"
+
+[admin]
+host = "127.0.0.1"
+port = 3100
+# Empty generates a secret on startup. Set a random secret for persistent sessions.
+sessionSecret = ""
+sessionMaxAge = 28800
+secureCookies = false
+
+[admin.auth]
+username = "admin"
+# Require enrollment before accessing the panel. Enrolled methods are always required at login.
+strict2fa = false
+# Generate with npm run password:hash; the server refuses to start without a hash.
+passwordHash = ""
+
+[api]
+url = "http://127.0.0.1:8080"
+accessToken = ""
+
+[dbs]
+# Administrator credentials, sessions, and challenges. Separate from WildDuck's database.
+engine = "sqlite" # sqlite or postgres
+# Used when engine = "sqlite".
+sqlite = "data/admin.sqlite"
+# Required when engine = "postgres"; database must already exist.
+postgres = "" # postgres://user:password@localhost:5432/wildduck_admin
+
+[totp]
+enabled = true
+# false uses the configured service name.
+issuer = false
+# Encryption secret: required with PostgreSQL; empty creates a key beside the SQLite file.
+# Once enrolled, retain this value (or the generated .key file).
+secret = ""
+
+[webauthn]
+enabled = true
+# "cross-platform" for security keys; "platform" for built-in authenticators; false allows both.
+authenticatorAttachment = false
+# false derives the RP ID from origin. Retain it after registering credentials.
+rpId = false
+# Set this to the public HTTPS origin in production. May also be an array of trusted origins.
+origin = ["http://localhost:3100", "http://localhost:5173"]
+# Require a PIN/biometric check with "required", or allow presence-only security keys with "preferred".
+userVerification = "preferred"

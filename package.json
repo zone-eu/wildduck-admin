@@ -1,0 +1,47 @@
+{
+  "name": "wildduck-admin-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal WildDuck admin UI",
+  "type": "module",
+  "scripts": {
+    "password:hash": "node scripts/hash-password.cjs",
+    "2fa:reset": "node scripts/reset-2fa.cjs",
+    "test": "node --test test/*.test.cjs",
+    "format": "prettier --write src server scripts test",
+    "format:check": "prettier --check src server scripts test",
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc -b && vite build",
+    "check": "tsc -b --pretty false",
+    "update": "rm -rf node_modules package-lock.json && ncu -u && npm install",
+    "start": "node server/index.cjs",
+    "preview": "npm run build && node server/index.cjs"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "14.0.0",
+    "@simplewebauthn/server": "14.0.3",
+    "@zone-eu/wild-config": "1.7.7",
+    "lucide-react": "1.56.0",
+    "otpauth": "9.5.2",
+    "pg": "8.23.1",
+    "qrcode": "1.5.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "autoprefixer": "10.6.1",
+    "postcss": "8.5.30",
+    "prettier": "3.9.10",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "license": "EUPL-1.2"
+}

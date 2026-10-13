@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-ink: 23 32 51;
+    --color-mist: 245 247 251;
+    --color-line: 220 227 237;
+    --color-surface: 255 255 255;
+    color-scheme: light;
+    color: rgb(var(--color-ink));
+    background: rgb(var(--color-mist));
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :root.dark {
+    --color-ink: 226 232 240;
+    --color-mist: 2 6 23;
+    --color-line: 51 65 85;
+    --color-surface: 15 23 42;
+    color-scheme: dark;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    background-color: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  button[data-danger='true'] {
+    @apply border border-rose-200 bg-rose-50 text-rose-700;
+  }
+  button[data-danger='true']:hover:not(:disabled) {
+    @apply border-rose-300 bg-rose-100 text-rose-800;
+  }
+  .dark button[data-danger='true'] {
+    @apply border-rose-800 bg-rose-950 text-rose-300;
+  }
+  .dark button[data-danger='true']:hover:not(:disabled) {
+    @apply bg-rose-900 text-rose-200;
+  }
+  .button-loading > svg:not(.button-spinner) {
+    display: none;
+  }
+}
+
+@layer components {
+  .input {
+    @apply h-10 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+  }
+
+  .checkbox {
+    @apply h-4 w-4 rounded border-line text-brand-600 focus:ring-brand-500;
+  }
+
+  .toast-notice {
+    animation: toast-lifecycle 3s ease-in-out forwards;
+  }
+
+  .toast-active {
+    animation: toast-in 140ms ease-out both;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  8%,
+  88% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
