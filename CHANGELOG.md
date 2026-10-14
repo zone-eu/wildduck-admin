@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/zone-eu/wildduck-admin/compare/v0.1.2...v0.1.3) (2026-10-14)
+
+
+### Bug Fixes
+
+* fix design and fix user update errors ([#5](https://github.com/zone-eu/wildduck-admin/issues/5)) ([d72dbe1](https://github.com/zone-eu/wildduck-admin/commit/d72dbe1eb1edddf2edf796f49c6011d7b6146920))
+
 ## [0.1.2](https://github.com/zone-eu/wildduck-admin/compare/v0.1.1...v0.1.2) (2026-10-13)
 
 
