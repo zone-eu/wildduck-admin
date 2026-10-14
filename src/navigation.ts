@@ -16,12 +16,13 @@ export const views = [
 export type View = (typeof views)[number];
 
 export function readView(href: string): View {
-  const view = new URL(href).searchParams.get('view');
+  const view = new URL(href).pathname.replace(/^\//, '').replace(/\/$/, '');
   return views.find(candidate => candidate === view) ?? 'overview';
 }
 
 export function viewUrl(href: string, view: View): string {
   const url = new URL(href);
-  url.searchParams.set('view', view);
+  url.pathname = view === 'overview' ? '/' : `/${view}`;
+  url.searchParams.delete('view');
   return `${url.pathname}${url.search}${url.hash}`;
 }
