@@ -759,7 +759,6 @@ async function handleApi(req, res, url) {
                 'tags',
                 'disabled',
                 'suspended',
-                'requirePasswordChange',
                 'require2faEnabled',
                 'disable2fa',
                 'spamLevel',

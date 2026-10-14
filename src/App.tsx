@@ -67,19 +67,7 @@ import { WebhooksView } from './views/WebhooksView';
 import { Button, ConfirmDialog, CopyButton, Field, IconButton, StatusPill } from './views/ui';
 import { ThemeToggle } from './views/ThemeToggle';
 
-type View =
-  | 'overview'
-  | 'users'
-  | 'mailrules'
-  | 'mailboxes'
-  | 'security'
-  | 'dkim'
-  | 'domainaccess'
-  | 'domainaliases'
-  | 'certs'
-  | 'storage'
-  | 'webhooks'
-  | 'settings';
+import { readView, viewUrl, type View } from './navigation';
 
 const quotaChoices = [
   { label: 'Default', value: 0 },
@@ -706,7 +694,6 @@ function UserDetailPanel({
   const [metadataDraft, setMetadataDraft] = useState('{}');
   const [disabledDraft, setDisabledDraft] = useState(false);
   const [suspendedDraft, setSuspendedDraft] = useState(false);
-  const [requirePasswordChangeDraft, setRequirePasswordChangeDraft] = useState(false);
   const [require2faDraft, setRequire2faDraft] = useState(false);
   const [disable2faDraft, setDisable2faDraft] = useState(false);
   const [address, setAddress] = useState('');
@@ -733,7 +720,6 @@ function UserDetailPanel({
     setMetadataDraft(JSON.stringify(user?.metaData ?? {}, null, 2));
     setDisabledDraft(Boolean(user?.disabled));
     setSuspendedDraft(Boolean(user?.suspended));
-    setRequirePasswordChangeDraft(Boolean(user?.requirePasswordChange));
     setRequire2faDraft(Boolean(user?.require2faEnabled));
     setDisable2faDraft(false);
     setUserError('');
@@ -785,7 +771,6 @@ function UserDetailPanel({
         .filter(Boolean),
       disabled: disabledDraft,
       suspended: suspendedDraft,
-      requirePasswordChange: requirePasswordChangeDraft,
       require2faEnabled: require2faDraft,
       spamLevel
     };
@@ -1031,15 +1016,6 @@ function UserDetailPanel({
                 className="checkbox"
               />
               Suspended
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={requirePasswordChangeDraft}
-                onChange={event => setRequirePasswordChangeDraft(event.target.checked)}
-                className="checkbox"
-              />
-              Require password change
             </label>
             <label className="inline-flex items-center gap-2">
               <input
@@ -1473,8 +1449,15 @@ function DkimCreateForm({ onCreate }: { onCreate: (input: DkimCreateInput) => Pr
           <textarea
             value={privateKey}
             onChange={event => setPrivateKey(event.target.value)}
+            aria-describedby="dkim-private-key-help"
             className="min-h-28 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
           />
+          <span
+            id="dkim-private-key-help"
+            className="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+          >
+            Leave blank to automatically generate a 2048-bit RSA key.
+          </span>
         </Field>
       </div>
       {error ? (
@@ -1919,7 +1902,21 @@ function SettingsView({
 export default function App() {
   const [session, setSession] = useState<SessionResponse | null>(null);
   const [booting, setBooting] = useState(true);
-  const [view, setView] = useState<View>('overview');
+  const [view, setActiveView] = useState<View>(() => readView(window.location.href));
+
+  function setView(next: View) {
+    if (next === view) {
+      return;
+    }
+    window.history.pushState(null, '', viewUrl(window.location.href, next));
+    setActiveView(next);
+  }
+
+  useEffect(() => {
+    const onPopState = () => setActiveView(readView(window.location.href));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [nextCursor, setNextCursor] = useState<string | false>();
@@ -1941,7 +1938,12 @@ export default function App() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingSettings, setLoadingSettings] = useState(false);
   const [loadingDkim, setLoadingDkim] = useState(false);
-  const [notice, setNotice] = useState('');
+  const [noticeState, setNoticeState] = useState({ message: '', tone: 'warning' });
+  const { message: notice, tone: noticeTone } = noticeState;
+
+  function setNotice(message: string, tone: 'warning' | 'success' = 'warning') {
+    setNoticeState({ message, tone });
+  }
   const [refreshingNotice, setRefreshingNotice] = useState('');
 
   const activeUser = useMemo(
@@ -2014,7 +2016,7 @@ export default function App() {
           : item
       )
     );
-    setNotice(`Updated ${setting.key}`);
+    setNotice(`Updated ${setting.key}`, 'success');
     await loadSettings();
   }
 
@@ -2053,13 +2055,13 @@ export default function App() {
   async function saveDkimKey(input: DkimCreateInput) {
     const response = await createDkimKey(input);
     setSelectedDkimKey(response);
-    setNotice(`Saved DKIM key for ${response.domain}`);
+    setNotice(`Saved DKIM key for ${response.domain}`, 'success');
     await loadDkim();
   }
 
   async function removeDkimKey(key: DkimKey) {
     await deleteDkimKey(key.id);
-    setNotice(`Deleted DKIM key for ${key.domain}`);
+    setNotice(`Deleted DKIM key for ${key.domain}`, 'success');
     setSelectedDkimKey(current => (current?.id === key.id ? null : current));
     await loadDkim();
   }
@@ -2068,7 +2070,7 @@ export default function App() {
     setRefreshingNotice(message);
     try {
       await task();
-      setNotice('Refresh loaded');
+      setNotice('Refresh loaded', 'success');
     } catch (err) {
       setNotice(err instanceof Error ? err.message : 'Refresh failed');
     } finally {
@@ -2176,10 +2178,14 @@ export default function App() {
               key={notice}
               role="status"
               aria-live="polite"
-              className="toast-notice pointer-events-auto flex items-start justify-between gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 px-4 py-3 text-sm text-amber-800 dark:text-amber-200 shadow-panel"
+              className={`toast-notice pointer-events-auto flex items-start justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow-panel ${noticeTone === 'success' ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200' : 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-200'}`}
             >
               <span className="flex min-w-0 items-start gap-2">
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                {noticeTone === 'success' ? (
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
+                ) : (
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                )}
                 <span className="break-words">{notice}</span>
               </span>
               <Button
@@ -2238,18 +2244,18 @@ export default function App() {
           }}
           onCreated={id => {
             setShowCreateUser(false);
-            setNotice(`Created user ${id}`);
+            setNotice(`Created user ${id}`, 'success');
             loadUsers();
           }}
           onChanged={() => {
-            setNotice('Updated user');
+            setNotice('Updated user', 'success');
             loadUsers();
             if (selectedUser) {
               selectUser(selectedUser);
             }
           }}
           onDeleted={user => {
-            setNotice(`Deleted user ${user.username}`);
+            setNotice(`Deleted user ${user.username}`, 'success');
             setSelectedUser(null);
             setAddresses([]);
             loadUsers();

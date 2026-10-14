@@ -226,7 +226,6 @@ export type UserUpdateInput = {
   tags?: string[];
   disabled?: boolean;
   suspended?: boolean;
-  requirePasswordChange?: boolean;
   require2faEnabled?: boolean;
   disable2fa?: boolean;
   spamLevel?: number;
