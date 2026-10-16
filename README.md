@@ -1,6 +1,6 @@
 # WildDuck Admin UI
 
-React, TypeScript, and Tailwind admin UI for WildDuck, with a local administrator login and a backend proxy that keeps the WildDuck API token on the server. Requires Node.js 22.13 or newer for built-in SQLite support.
+React, TypeScript, Tailwind CSS, and daisyUI admin UI for WildDuck, with a local administrator login and a backend proxy that keeps the WildDuck API token on the server. Requires Node.js 22.13 or newer for built-in SQLite support.
 
 You need a separately running WildDuck server with its HTTP API reachable from this backend and an API token with permissions for the operations you want to use. This project does not install or run WildDuck. Install dependencies from the project root. The `packages/` directory is not required to build or run the UI.
 
@@ -141,8 +141,6 @@ npm run format:check
 Tests exercise salted password hashing, the hash CLI, startup validation, login/session behavior, and authenticated filter/autoreply forwarding using a local mock WildDuck API. They do not require a running WildDuck instance.
 
 Run `npm run format` to format the source, server, scripts, and tests with Prettier. The frontend uses two-space indentation. CommonJS server files, scripts, and tests use four spaces. `src/vite-env.d.ts` loads Vite's client types so TypeScript recognizes CSS and other asset imports.
-
-Tailwind CSS 4 is compiled through `@tailwindcss/postcss`. Theme colors, fonts, shadows, and the class-based dark variant are defined in `src/styles.css` using `@theme` and `@custom-variant`. Edit that stylesheet to customize the theme; there is no separate Tailwind configuration file.
 
 ## License
 

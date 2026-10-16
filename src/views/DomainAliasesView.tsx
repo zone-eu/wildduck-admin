@@ -1,16 +1,16 @@
-import { ChevronLeft, ChevronRight, Link2, Plus, RefreshCw, Search, Trash2 } from 'lucide-react';
+import {
+  CaretLeftIcon as ChevronLeft,
+  CaretRightIcon as ChevronRight,
+  LinkIcon as Link2,
+  PlusIcon as Plus,
+  ArrowsClockwiseIcon as RefreshCw,
+  MagnifyingGlassIcon as Search,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { createDomainAlias, deleteDomainAlias, getDomainAlias, getDomainAliases } from '../api';
 import type { DomainAlias } from '../types';
-import {
-  Button,
-  ConfirmDialog,
-  ErrorNotice,
-  Field,
-  IconButton,
-  StatusPill,
-  formatDate
-} from './ui';
+import { ConfirmDialog, formatDate } from './ui';
 
 function DomainAliasCreateForm({
   onCreate
@@ -48,39 +48,46 @@ function DomainAliasCreateForm({
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
+      className="card border border-base-300 bg-base-100 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
-        <Plus className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+        <Plus className="h-4 w-4 text-primary" />
         <h3 className="font-semibold">Create alias</h3>
       </div>
       <div className="space-y-3">
-        <Field label="Alias">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Alias</span>
           <input
             value={alias}
             onChange={event => setAlias(event.target.value)}
             placeholder="alias.example"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Domain">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Domain</span>
           <input
             value={domain}
             onChange={event => setDomain(event.target.value)}
             placeholder="example.com"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <ErrorNotice message={error} />
-        <Button
-          loading={busy}
+        </label>
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
+        <button
           type="submit"
+          className="btn btn-primary w-full"
           disabled={busy}
-          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-busy={Boolean(busy) || undefined}
         >
+          {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
           <Plus className="h-4 w-4" />
           Add alias
-        </Button>
+        </button>
       </div>
     </form>
   );
@@ -116,54 +123,61 @@ function DomainAliasDetailPanel({
 
   if (!selected) {
     return (
-      <div className="rounded-lg border border-dashed border-line bg-white dark:bg-slate-900 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        <Link2 className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+      <div className="card border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/60">
+        <Link2 className="mx-auto mb-3 h-8 w-8 text-base-content/30" />
         No alias selected
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-      <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
+    <div className="card border border-base-300 bg-base-100 shadow-xs">
+      <div className="flex items-start justify-between gap-3 border-b border-base-300 px-4 py-3">
         <div className="min-w-0">
           <h3 className="break-all font-display text-lg font-semibold">{selected.alias}</h3>
-          <p className="break-all text-sm text-slate-500 dark:text-slate-400">{selected.domain}</p>
+          <p className="break-all text-sm text-base-content/60">{selected.domain}</p>
         </div>
-        <IconButton
-          loading={busy}
+        <button
           title="Delete alias"
           onClick={() => setConfirmOpen(true)}
+          aria-label="Delete alias"
+          type="button"
+          className="btn btn-square btn-sm btn-error btn-soft"
           disabled={busy}
+          aria-busy={Boolean(busy) || undefined}
         >
-          <Trash2 className="h-4 w-4" />
-        </IconButton>
+          {busy ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
       </div>
       <div className="space-y-3 p-4 text-sm">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <div className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
             ID
           </div>
-          <div className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-200">
-            {selected.id}
-          </div>
+          <div className="mt-1 break-all font-mono text-xs text-base-content/80">{selected.id}</div>
         </div>
         <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <div className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
             Created
           </div>
-          <div className="mt-1 text-slate-700 dark:text-slate-200">
-            {formatDate(selected.created)}
-          </div>
+          <div className="mt-1 text-base-content/80">{formatDate(selected.created)}</div>
         </div>
-        <ErrorNotice message={error} />
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
       </div>
       <ConfirmDialog
         open={confirmOpen}
         title="Delete alias"
         message={
           <>
-            Delete alias <strong className="break-all text-ink">{selected.alias}</strong>?
+            Delete alias <strong className="break-all text-base-content">{selected.alias}</strong>?
           </>
         }
         confirmLabel="Delete alias"
@@ -248,78 +262,91 @@ export function DomainAliasesView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Domain Aliases</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{total} aliases</p>
+          <p className="text-sm text-base-content/60">{total} aliases</p>
         </div>
-        <IconButton loading={loading} title="Refresh" onClick={() => load()} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </IconButton>
+        <button
+          title="Refresh"
+          onClick={() => load()}
+          aria-label="Refresh"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
+          disabled={loading}
+          aria-busy={Boolean(loading) || undefined}
+        >
+          {loading ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-          <div className="border-b border-line p-4">
+        <div className="card border border-base-300 bg-base-100 shadow-xs">
+          <div className="border-b border-base-300 p-4">
             <form onSubmit={submitSearch} className="flex gap-2">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <div className="relative flex min-w-0 flex-1 items-center">
+                <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
                 <input
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="Alias or domain"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="input w-full pl-9 pr-3"
                 />
               </div>
-              <Button
-                loading={loading}
+              <button
                 type="submit"
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+                className="btn btn-outline"
+                disabled={loading}
+                aria-busy={Boolean(loading) || undefined}
               >
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <Search className="h-4 w-4" />
                 Search
-              </Button>
+              </button>
             </form>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <table className="table table-sm w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Alias</th>
-                  <th className="px-4 py-3">Domain</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th>Alias</th>
+                  <th>Domain</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {aliases.map(alias => {
                   const active = selected?.id === alias.id;
                   return (
                     <tr
                       key={alias.id}
                       onClick={() => selectAlias(alias)}
-                      className={`cursor-pointer transition ${active ? 'bg-brand-50 dark:bg-teal-950' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      className={`cursor-pointer transition ${active ? 'bg-primary/10' : 'hover:bg-base-200'}`}
                     >
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="break-all font-medium">{alias.alias}</div>
-                        <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                          {alias.id}
-                        </div>
+                        <div className="font-mono text-xs text-base-content/60">{alias.id}</div>
                       </td>
-                      <td className="break-all px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {alias.domain}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusPill label="Mapped" tone="success" />
+                      <td className="break-all text-base-content/70">{alias.domain}</td>
+                      <td>
+                        <span className="badge badge-sm badge-soft badge-success">Mapped</span>
                       </td>
                     </tr>
                   );
                 })}
                 {!aliases.length ? (
                   <tr>
-                    <td
-                      className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                      colSpan={3}
-                    >
+                    <td className="text-center text-base-content/60" colSpan={3}>
                       No aliases found
                     </td>
                   </tr>
@@ -328,25 +355,39 @@ export function DomainAliasesView() {
             </table>
           </div>
 
-          <div className="flex items-center justify-between border-t border-line px-4 py-3">
-            <div className="text-sm text-slate-500 dark:text-slate-400">{aliases.length} shown</div>
+          <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+            <div className="text-sm text-base-content/60">{aliases.length} shown</div>
             <div className="flex gap-2">
-              <IconButton
-                loading={loading}
+              <button
                 title="Previous page"
                 onClick={() => previousCursor && load({ previous: previousCursor })}
-                disabled={!previousCursor}
+                aria-label="Previous page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!previousCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </IconButton>
-              <IconButton
-                loading={loading}
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+              <button
                 title="Next page"
                 onClick={() => nextCursor && load({ next: nextCursor })}
-                disabled={!nextCursor}
+                aria-label="Next page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!nextCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronRight className="h-4 w-4" />
-              </IconButton>
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
         </div>

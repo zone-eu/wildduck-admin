@@ -1,5 +1,11 @@
 import { FormEvent, useState } from 'react';
-import { Fingerprint, KeyRound, LogOut, ShieldCheck, Trash2 } from 'lucide-react';
+import {
+  FingerprintIcon as Fingerprint,
+  KeyIcon as KeyRound,
+  SignOutIcon as LogOut,
+  ShieldCheckIcon as ShieldCheck,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import {
   browserSupportsWebAuthn,
   startAuthentication,
@@ -18,20 +24,8 @@ import {
 } from '../api';
 import { ThemeToggle } from './ThemeToggle';
 import type { SessionResponse } from '../types';
-import {
-  Button,
-  ConfirmDialog,
-  CopyButton,
-  ErrorNotice,
-  Field,
-  StatusPill,
-  formatDate
-} from './ui';
+import { ConfirmDialog, CopyButton, formatDate } from './ui';
 
-const primaryButton =
-  'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50';
-const secondaryButton =
-  'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50';
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'Authentication failed';
 
@@ -53,7 +47,7 @@ function WebAuthnUnavailableNotice() {
     return null;
   }
   return (
-    <div className="space-y-2 text-sm text-amber-700 dark:text-amber-300">
+    <div className="space-y-2 text-sm text-warning">
       <p>
         {availability.ipAddress
           ? 'Passkeys require a domain name. WebAuthn cannot use an IP address such as 127.0.0.1.'
@@ -116,55 +110,54 @@ export function AdminTwoFactorGate({
   }
 
   return (
-    <main className="min-h-screen bg-mist px-4 py-10">
+    <main className="min-h-screen bg-base-200 px-4 py-10">
       <div className="mx-auto max-w-2xl space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <img
-              src="/duck.png"
-              alt=""
-              className="h-11 w-11 rounded-xl bg-brand-50 dark:bg-teal-950 p-1"
-            />
+            <img src="/duck.png" alt="" className="h-11 w-11 rounded-xl bg-primary/10 p-1" />
             <div>
               <h1 className="font-display text-xl font-semibold">Administrator verification</h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Signed in as {session.user}
-              </p>
+              <p className="text-sm text-base-content/60">Signed in as {session.user}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button type="button" className={secondaryButton} onClick={onLogout}>
+            <button type="button" className="btn btn-outline" onClick={onLogout}>
               <LogOut className="h-4 w-4" />
               Sign out
-            </Button>
+            </button>
           </div>
         </div>
         {status.setupRequired ? (
           <>
-            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 p-4 text-sm text-amber-900 dark:text-amber-200">
+            <div className="alert alert-warning alert-soft block text-sm">
               Two-factor authentication is required. Add an available authentication method to
               continue to the admin panel.
             </div>
             <AdminSecuritySettings session={session} onSession={onSession} enrollment />
           </>
         ) : (
-          <section className="space-y-5 rounded-xl border border-line bg-white dark:bg-slate-900 p-6 shadow-panel">
+          <section className="space-y-5 card border border-base-300 bg-base-100 p-6 shadow-sm">
             <div>
               <h2 className="font-display text-xl font-semibold">
                 Complete two-factor authentication
               </h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-sm text-base-content/60">
                 Verify with one of your enrolled methods to access the panel.
               </p>
             </div>
-            <ErrorNotice message={error} />
+            {error ? (
+              <div role="alert" className="alert alert-error alert-soft">
+                <span className="min-w-0 break-words">{error}</span>
+              </div>
+            ) : null}
             {status.methods.includes('totp') ? (
               <form onSubmit={verifyTotp} className="space-y-3">
-                <Field label="Authenticator code">
+                <label className="fieldset min-w-0">
+                  <span className="fieldset-legend">Authenticator code</span>
                   <input
                     autoFocus
-                    className="input text-lg tracking-widest"
+                    className="input w-full text-lg tracking-widest"
                     inputMode="numeric"
                     pattern="[0-9]{6}"
                     maxLength={6}
@@ -174,34 +167,40 @@ export function AdminTwoFactorGate({
                     required
                     disabled={busy}
                   />
-                </Field>
-                <Button
-                  loading={busy}
-                  className={`${primaryButton} w-full`}
-                  disabled={busy}
+                </label>
+                <button
+                  className="btn btn-primary w-full"
                   type="submit"
+                  disabled={busy}
+                  aria-busy={Boolean(busy) || undefined}
                 >
+                  {busy ? (
+                    <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                  ) : null}
                   <ShieldCheck className="h-4 w-4" />
                   {busy ? 'Verifying…' : 'Verify code'}
-                </Button>
+                </button>
               </form>
             ) : null}
             {status.methods.includes('webauthn') ? (
               <div className="space-y-2">
-                <Button
-                  loading={busy}
-                  className={`${secondaryButton} w-full`}
+                <button
+                  className="btn btn-outline w-full"
                   type="button"
-                  disabled={busy || !webauthnAvailability().supported}
                   onClick={verifyPasskey}
+                  disabled={busy || !webauthnAvailability().supported || busy}
+                  aria-busy={Boolean(busy) || undefined}
                 >
+                  {busy ? (
+                    <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                  ) : null}
                   <Fingerprint className="h-4 w-4" />
                   Use a passkey or security key
-                </Button>
+                </button>
                 <WebAuthnUnavailableNotice />
               </div>
             ) : null}
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-base-content/60">
               This sign-in step expires after ten minutes. Sign out and sign in again if it expires.
             </p>
           </section>
@@ -304,81 +303,87 @@ export function AdminSecuritySettings({
     status.credentials.length === 1;
 
   return (
-    <section className="space-y-5 rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
+    <section className="space-y-5 card border border-base-300 bg-base-100 p-5 shadow-xs">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-xl font-semibold">
             {enrollment ? 'Set up two-factor authentication' : 'Administrator security'}
           </h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1 text-sm text-base-content/60">
             Protect your local admin account with an authenticator app or a passkey.
           </p>
         </div>
-        <StatusPill
-          label={
-            status.strict ? '2FA required' : status.methods.length ? '2FA enabled' : '2FA optional'
-          }
-          tone={status.methods.length ? 'success' : status.strict ? 'warning' : 'muted'}
-        />
+        <span
+          className={`badge badge-sm badge-soft ${status.methods.length ? 'badge-success' : status.strict ? 'badge-warning' : 'badge-ghost'}`}
+        >
+          {status.strict ? '2FA required' : status.methods.length ? '2FA enabled' : '2FA optional'}
+        </span>
       </div>
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
       {notice ? (
-        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+        <p role="status" className="text-sm text-success">
           {notice}
         </p>
       ) : null}
       {!enrollment ? (
         <div className="max-w-md space-y-2">
-          <Field label="Current administrator password">
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Current administrator password</span>
             <input
               type="password"
-              className="input"
+              className="input w-full"
               autoComplete="current-password"
               value={password}
               onChange={event => setPassword(event.target.value)}
               disabled={Boolean(busy)}
             />
-          </Field>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          </label>
+          <p className="text-xs text-base-content/60">
             Enter your password before adding or removing a method.
           </p>
         </div>
       ) : null}
       <div className="grid gap-5 xl:grid-cols-2">
-        <div className="space-y-4 rounded-xl border border-line p-4">
+        <div className="space-y-4 rounded-xl border border-base-300 p-4">
           <div className="flex items-center gap-2">
-            <KeyRound className="h-5 w-5 text-brand-600 dark:text-teal-300" />
+            <KeyRound className="h-5 w-5 text-primary" />
             <h3 className="font-semibold">Authenticator app</h3>
           </div>
           {!status.totpAllowed ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-base-content/60">
               Authenticator apps are disabled by the administrator configuration.
             </p>
           ) : status.totpEnrolled ? (
             <div className="space-y-3">
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-base-content/70">
                 Your authenticator app is enrolled. Enter its six-digit code at sign-in.
               </p>
-              <Button
-                loading={busy === 'remove-totp'}
-                danger
-                className={secondaryButton}
+              <button
+                className="btn btn-error btn-soft"
                 type="button"
-                disabled={Boolean(busy) || lastTotp || !password}
                 onClick={() => setRemoving({ type: 'totp', name: 'your authenticator app' })}
+                disabled={Boolean(busy) || lastTotp || !password || busy === 'remove-totp'}
+                aria-busy={Boolean(busy === 'remove-totp') || undefined}
               >
+                {busy === 'remove-totp' ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <Trash2 className="h-4 w-4" />
                 Remove authenticator
-              </Button>
+              </button>
               {lastTotp ? (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-base-content/60">
                   Add a passkey before removing your last required method.
                 </p>
               ) : null}
             </div>
           ) : setup ? (
             <form onSubmit={confirmTotp} className="space-y-3">
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-base-content/70">
                 Scan this code in your authenticator app, then enter the code it generates. Setup
                 expires after five minutes.
               </p>
@@ -387,17 +392,19 @@ export function AdminSecuritySettings({
                 alt="Authenticator app setup QR code"
                 className="mx-auto h-60 w-60 max-w-full"
               />
-              <Field label="Manual setup key">
+              <label className="fieldset min-w-0">
+                <span className="fieldset-legend">Manual setup key</span>
                 <div className="flex items-center gap-2">
-                  <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-sm">
+                  <code className="min-w-0 flex-1 break-all rounded-lg bg-base-200 p-3 text-sm">
                     {setup.secret}
                   </code>
                   <CopyButton value={setup.secret} title="Copy setup key" />
                 </div>
-              </Field>
-              <Field label="Authenticator code">
+              </label>
+              <label className="fieldset min-w-0">
+                <span className="fieldset-legend">Authenticator code</span>
                 <input
-                  className="input"
+                  className="input w-full"
                   inputMode="numeric"
                   pattern="[0-9]{6}"
                   maxLength={6}
@@ -407,18 +414,21 @@ export function AdminSecuritySettings({
                   required
                   disabled={Boolean(busy)}
                 />
-              </Field>
+              </label>
               <div className="flex flex-wrap gap-2">
-                <Button
-                  loading={busy === 'enable'}
+                <button
                   type="submit"
-                  className={primaryButton}
-                  disabled={Boolean(busy)}
+                  className="btn btn-primary"
+                  disabled={Boolean(busy) || busy === 'enable'}
+                  aria-busy={Boolean(busy === 'enable') || undefined}
                 >
+                  {busy === 'enable' ? (
+                    <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                  ) : null}
                   {busy === 'enable' ? 'Verifying…' : 'Verify and enable'}
-                </Button>
-                <Button
-                  className={secondaryButton}
+                </button>
+                <button
+                  className="btn btn-outline"
                   type="button"
                   disabled={Boolean(busy)}
                   onClick={() => {
@@ -427,39 +437,42 @@ export function AdminSecuritySettings({
                   }}
                 >
                   Cancel setup
-                </Button>
+                </button>
               </div>
             </form>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-base-content/70">
                 Use an authenticator app such as Google Authenticator, 1Password, or another TOTP
                 app.
               </p>
-              <Button
-                loading={busy === 'setup'}
+              <button
                 type="button"
-                className={primaryButton}
-                disabled={Boolean(busy) || (!enrollment && !password)}
+                className="btn btn-primary"
                 onClick={beginTotp}
+                disabled={Boolean(busy) || (!enrollment && !password) || busy === 'setup'}
+                aria-busy={Boolean(busy === 'setup') || undefined}
               >
+                {busy === 'setup' ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 {busy === 'setup' ? 'Preparing…' : 'Set up authenticator'}
-              </Button>
+              </button>
             </div>
           )}
         </div>
-        <div className="space-y-4 rounded-xl border border-line p-4">
+        <div className="space-y-4 rounded-xl border border-base-300 p-4">
           <div className="flex items-center gap-2">
-            <Fingerprint className="h-5 w-5 text-brand-600 dark:text-teal-300" />
+            <Fingerprint className="h-5 w-5 text-primary" />
             <h3 className="font-semibold">Passkeys and security keys</h3>
           </div>
           {!status.webauthnAllowed ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-base-content/60">
               Passkeys are disabled by the administrator configuration.
             </p>
           ) : (
             <>
-              <p className="text-sm text-slate-600 dark:text-slate-300">
+              <p className="text-sm text-base-content/70">
                 Use your device, password manager, or a physical security key as your second sign-in
                 step.
               </p>
@@ -468,17 +481,15 @@ export function AdminSecuritySettings({
                   {status.credentials.map(credential => (
                     <li
                       key={credential.id}
-                      className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 dark:bg-slate-800 p-3"
+                      className="flex items-center justify-between gap-3 rounded-lg bg-base-200 p-3"
                     >
                       <div className="min-w-0">
                         <p className="break-words text-sm font-semibold">{credential.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-base-content/60">
                           Added {formatDate(credential.created)}
                         </p>
                       </div>
-                      <Button
-                        loading={busy === `remove-${credential.id}`}
-                        danger
+                      <button
                         type="button"
                         aria-label={`Remove ${credential.name}`}
                         title={
@@ -486,8 +497,7 @@ export function AdminSecuritySettings({
                             ? 'Add another method before removing your last required passkey'
                             : `Remove ${credential.name}`
                         }
-                        className="rounded-lg p-2 text-rose-600 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950 disabled:opacity-40"
-                        disabled={Boolean(busy) || lastPasskey || !password}
+                        className="btn btn-error btn-soft"
                         onClick={() =>
                           setRemoving({
                             type: 'webauthn',
@@ -495,17 +505,28 @@ export function AdminSecuritySettings({
                             name: credential.name
                           })
                         }
+                        disabled={
+                          Boolean(busy) ||
+                          lastPasskey ||
+                          !password ||
+                          busy === `remove-${credential.id}`
+                        }
+                        aria-busy={Boolean(busy === `remove-${credential.id}`) || undefined}
                       >
+                        {busy === `remove-${credential.id}` ? (
+                          <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                        ) : null}
                         <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </button>
                     </li>
                   ))}
                 </ul>
               ) : null}
               <form className="space-y-3" onSubmit={addPasskey}>
-                <Field label="Passkey name">
+                <label className="fieldset min-w-0">
+                  <span className="fieldset-legend">Passkey name</span>
                   <input
-                    className="input"
+                    className="input w-full"
                     value={name}
                     onChange={event => setName(event.target.value)}
                     maxLength={128}
@@ -513,25 +534,29 @@ export function AdminSecuritySettings({
                     disabled={Boolean(busy)}
                     placeholder="Laptop or security key"
                   />
-                </Field>
-                <Button
-                  loading={busy === 'register'}
+                </label>
+                <button
                   type="submit"
-                  className={primaryButton}
+                  className="btn btn-primary"
                   disabled={
                     Boolean(busy) ||
                     !webauthnSupported ||
                     Boolean(setup) ||
-                    (!enrollment && !password)
+                    (!enrollment && !password) ||
+                    busy === 'register'
                   }
+                  aria-busy={Boolean(busy === 'register') || undefined}
                 >
+                  {busy === 'register' ? (
+                    <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                  ) : null}
                   <Fingerprint className="h-4 w-4" />
                   {busy === 'register' ? 'Waiting for your device…' : 'Add passkey'}
-                </Button>
+                </button>
               </form>
               <WebAuthnUnavailableNotice />
               {lastPasskey ? (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-base-content/60">
                   Add another passkey or an authenticator app before removing the last method.
                 </p>
               ) : null}

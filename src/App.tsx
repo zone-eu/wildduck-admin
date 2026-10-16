@@ -1,28 +1,29 @@
 import {
-  Activity,
-  AlertCircle,
-  Archive,
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
-  HardDrive,
-  KeyRound,
-  LoaderCircle,
-  LogOut,
-  Mail,
-  Plus,
-  RefreshCw,
-  RotateCcw,
-  Save,
-  Search,
-  Server,
-  Settings,
-  Shield,
-  Trash2,
-  UserPlus,
-  Users,
-  Webhook
-} from 'lucide-react';
+  PulseIcon as Activity,
+  WarningCircleIcon as AlertCircle,
+  ArchiveIcon as Archive,
+  CheckCircleIcon as CheckCircle2,
+  CaretLeftIcon as ChevronLeft,
+  CaretRightIcon as ChevronRight,
+  HardDriveIcon as HardDrive,
+  KeyIcon as KeyRound,
+  ListIcon as List,
+  SpinnerGapIcon as LoaderCircle,
+  SignOutIcon as LogOut,
+  EnvelopeIcon as Mail,
+  PlusIcon as Plus,
+  ArrowsClockwiseIcon as RefreshCw,
+  ArrowCounterClockwiseIcon as RotateCcw,
+  FloppyDiskIcon as Save,
+  MagnifyingGlassIcon as Search,
+  HardDrivesIcon as Server,
+  GearIcon as Settings,
+  ShieldIcon as Shield,
+  TrashIcon as Trash2,
+  UserPlusIcon as UserPlus,
+  UsersIcon as Users,
+  WebhooksLogoIcon as Webhook
+} from '@phosphor-icons/react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   createAddress,
@@ -64,7 +65,7 @@ import { MailboxesView } from './views/MailboxesView';
 import { SecurityView } from './views/SecurityView';
 import { StorageView } from './views/StorageView';
 import { WebhooksView } from './views/WebhooksView';
-import { Button, ConfirmDialog, CopyButton, Field, IconButton, StatusPill } from './views/ui';
+import { ConfirmDialog, CopyButton, formatBytes, formatDate } from './views/ui';
 import { ThemeToggle } from './views/ThemeToggle';
 
 import { readView, viewUrl, type View } from './navigation';
@@ -75,21 +76,6 @@ const quotaChoices = [
   { label: '5 GB', value: 5 * 1024 ** 3 },
   { label: '10 GB', value: 10 * 1024 ** 3 }
 ];
-
-function formatBytes(value?: number) {
-  if (!value) {
-    return '0 B';
-  }
-
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let amount = value;
-  let unit = 0;
-  while (amount >= 1024 && unit < units.length - 1) {
-    amount /= 1024;
-    unit += 1;
-  }
-  return `${amount >= 10 || unit === 0 ? amount.toFixed(0) : amount.toFixed(1)} ${units[unit]}`;
-}
 
 function userStatus(user?: UserListItem | UserDetails): {
   label: string;
@@ -137,62 +123,57 @@ function LoginScreen({ onLogin }: { onLogin: (session: SessionResponse) => void 
   }
 
   return (
-    <main className="relative grid min-h-screen place-items-center bg-mist px-4 py-10">
+    <main className="relative grid min-h-screen place-items-center bg-base-200 px-4 py-10">
       <div className="absolute right-4 top-4">
         <ThemeToggle />
       </div>
-      <div className="w-full max-w-sm rounded-lg border border-line bg-white dark:bg-slate-900 p-6 shadow-panel">
+      <div className="w-full max-w-sm card border border-base-300 bg-base-100 p-6 shadow-sm">
         <div className="mb-6 flex items-center gap-3">
-          <img
-            src="/duck.png"
-            alt=""
-            className="h-11 w-11 rounded-lg bg-brand-50 dark:bg-teal-950 p-1"
-          />
+          <img src="/duck.png" alt="" className="h-11 w-11 rounded-lg bg-primary/10 p-1" />
           <div>
-            <h1 className="font-display text-xl font-semibold text-ink">WildDuck Admin</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Configured administrator</p>
+            <h1 className="font-display text-xl font-semibold text-base-content">WildDuck Admin</h1>
+            <p className="text-sm text-base-content/60">Configured administrator</p>
           </div>
         </div>
 
         <form onSubmit={submit} noValidate className="space-y-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Username
-            </span>
+            <span className="mb-1 block text-sm font-medium text-base-content/80">Username</span>
             <input
               value={username}
               onChange={event => setUsername(event.target.value)}
-              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+              className="input w-full"
               autoComplete="username"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
-              Password
-            </span>
+            <span className="mb-1 block text-sm font-medium text-base-content/80">Password</span>
             <input
               value={password}
               onChange={event => setPassword(event.target.value)}
               type="password"
-              className="h-10 w-full rounded-lg border border-line px-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+              className="input w-full"
               autoComplete="current-password"
             />
           </label>
           {error ? (
-            <div className="flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+            <div className="alert alert-error alert-soft">
               <AlertCircle className="h-4 w-4" />
               {error}
             </div>
           ) : null}
-          <Button
-            loading={busy}
+          <button
             type="submit"
+            className="btn btn-primary w-full"
             disabled={busy}
-            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={Boolean(busy) || undefined}
           >
+            {busy ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
             <Shield className="h-4 w-4" />
             Sign in
-          </Button>
+          </button>
         </form>
       </div>
     </main>
@@ -212,6 +193,7 @@ function Shell({
   onLogout: () => void;
   children: React.ReactNode;
 }) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const nav = [
     { id: 'overview' as const, label: 'Overview', icon: Activity },
     { id: 'users' as const, label: 'Users', icon: Users },
@@ -226,7 +208,6 @@ function Shell({
     { id: 'webhooks' as const, label: 'Webhooks', icon: Webhook },
     { id: 'settings' as const, label: 'Settings', icon: Settings }
   ];
-
   const groups = [
     {
       label: 'Accounts',
@@ -235,94 +216,121 @@ function Shell({
     { label: 'Domains', ids: ['dkim', 'domainaccess', 'domainaliases', 'certs'] },
     { label: 'System', ids: ['webhooks', 'settings'] }
   ];
+
   function navigation(ids: string[]) {
     return nav
       .filter(item => ids.includes(item.id))
       .map(item => {
         const Icon = item.icon;
         return (
-          <Button
-            align="start"
-            key={item.id}
-            type="button"
-            aria-current={view === item.id ? 'page' : undefined}
-            onClick={() => onView(item.id)}
-            className={`inline-flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition lg:w-full ${view === item.id ? 'bg-brand-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-teal-950 hover:text-brand-700 dark:hover:text-teal-300'}`}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {item.label}
-          </Button>
+          <li key={item.id}>
+            <button
+              type="button"
+              aria-current={view === item.id ? 'page' : undefined}
+              className={`py-2 ${view === item.id ? 'menu-active' : ''}`}
+              onClick={() => {
+                setDrawerOpen(false);
+                onView(item.id);
+              }}
+            >
+              <Icon className="size-5 shrink-0" aria-hidden="true" />
+              <span>{item.label}</span>
+            </button>
+          </li>
         );
       });
   }
+
   return (
-    <div className="min-h-screen bg-mist text-ink">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-white dark:focus:bg-slate-900 focus:p-3"
-      >
-        Skip to content
-      </a>
-      <header className="sticky top-0 z-20 border-b border-line bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm">
-        <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <img
-              src="/duck.png"
-              alt=""
-              className="h-10 w-10 rounded-xl bg-brand-50 dark:bg-teal-950 p-1"
-            />
-            <div className="min-w-0">
-              <div className="truncate font-display text-base font-semibold">
-                {session.service?.name || 'WildDuck Admin'}
-              </div>
-              <div className="truncate text-xs text-slate-500 dark:text-slate-400">
-                Mail administration
+    <div className="drawer min-h-screen bg-base-200 text-base-content lg:drawer-open">
+      <input
+        id="admin-navigation-drawer"
+        type="checkbox"
+        className="drawer-toggle"
+        checked={drawerOpen}
+        onChange={event => setDrawerOpen(event.target.checked)}
+      />
+      <div className="drawer-content min-w-0">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-box focus:bg-base-100 focus:p-3"
+        >
+          Skip to content
+        </a>
+        <header className="navbar sticky top-0 z-20 min-h-16 justify-between gap-3 border-b border-base-300 bg-base-100/95 px-3 backdrop-blur-sm sm:px-6">
+          <div className="flex min-w-0 items-center gap-2">
+            <label
+              htmlFor="admin-navigation-drawer"
+              className="btn btn-square btn-ghost drawer-button lg:hidden"
+              aria-label="Open navigation menu"
+            >
+              <List className="size-5" aria-hidden="true" />
+            </label>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="dropdown dropdown-end">
+              <button type="button" tabIndex={0} className="btn btn-ghost btn-sm">
+                <span className="hidden sm:inline">API endpoint</span>
+                <span className="sm:hidden">API</span>
+              </button>
+              <div
+                tabIndex={0}
+                className="dropdown-content card card-border z-30 mt-3 w-72 rounded-box bg-base-100 p-4 shadow-lg"
+              >
+                <p className="font-semibold">WildDuck API</p>
+                <p className="mt-2 break-all text-xs text-base-content/60">{session.api?.url}</p>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
             <ThemeToggle />
-            <span className="hidden text-sm text-slate-500 dark:text-slate-400 sm:inline">
-              {session.user}
+            <span className="hidden text-sm text-base-content/60 sm:inline">{session.user}</span>
+            <span
+              className={`badge badge-sm badge-soft ${session.api?.tokenConfigured ? 'badge-success' : 'badge-warning'}`}
+            >
+              {session.api?.tokenConfigured ? 'API configured' : 'No API token'}
             </span>
-            <StatusPill
-              label={session.api?.tokenConfigured ? 'API configured' : 'No API token'}
-              tone={session.api?.tokenConfigured ? 'success' : 'warning'}
-            />
-            <IconButton title="Sign out" onClick={onLogout}>
-              <LogOut className="h-4 w-4" />
-            </IconButton>
+            <button
+              title="Sign out"
+              onClick={onLogout}
+              aria-label="Sign out"
+              type="button"
+              className="btn btn-square btn-ghost"
+            >
+              <LogOut className="size-5" aria-hidden="true" />
+            </button>
           </div>
-        </div>
-        <nav
-          aria-label="Main navigation"
-          className="flex gap-1 overflow-x-auto px-4 pb-3 lg:hidden"
-        >
-          {navigation(nav.map(item => item.id))}
-        </nav>
-      </header>
-      <div className="flex">
-        <aside className="sticky top-[65px] hidden h-[calc(100dvh-65px)] w-56 shrink-0 flex-col justify-between overflow-y-auto border-r border-line bg-white dark:bg-slate-900 p-4 lg:flex">
-          <nav aria-label="Main navigation" className="space-y-6">
-            {groups.map(group => (
-              <div key={group.label}>
-                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  {group.label}
-                </p>
-                <div className="space-y-1">{navigation(group.ids)}</div>
-              </div>
-            ))}
-          </nav>
-          <div className="mt-8 border-t border-line px-3 pt-4">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">WildDuck API</p>
-            <p title={session.api?.url} className="mt-1 break-all text-xs text-slate-400">
-              {session.api?.url}
-            </p>
-          </div>
-        </aside>
-        <main id="main-content" tabIndex={-1} className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        </header>
+        <main id="main-content" tabIndex={-1} className="min-w-0 px-3 py-5 sm:px-6 sm:py-6 lg:px-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
+      </div>
+      <div className="drawer-side z-30">
+        <label
+          htmlFor="admin-navigation-drawer"
+          aria-label="Close navigation menu"
+          className="drawer-overlay"
+        />
+        <aside className="flex min-h-full w-72 flex-col gap-5 border-r border-base-300 bg-base-100 p-4 pt-6">
+          <a href="#main-content" className="flex items-center gap-3 rounded-box px-3 py-2">
+            <img src="/duck.png" alt="" className="size-11 rounded-box bg-primary/10 p-1" />
+            <span className="min-w-0">
+              <span className="block truncate font-display font-semibold">
+                {session.service?.name || 'WildDuck Admin'}
+              </span>
+              <span className="block text-xs text-base-content/60">Administration</span>
+            </span>
+          </a>
+          <nav aria-label="Main navigation" className="min-h-0 flex-1 overflow-y-auto">
+            {groups.map(group => (
+              <ul
+                key={group.label}
+                className="menu menu-md mb-3 w-full gap-1 rounded-box bg-base-100 p-2"
+              >
+                <li className="menu-title px-3 uppercase tracking-wider">{group.label}</li>
+                {navigation(group.ids)}
+              </ul>
+            ))}
+          </nav>
+        </aside>
       </div>
     </div>
   );
@@ -385,60 +393,76 @@ function UsersView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Users</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{total} accounts</p>
+          <p className="text-sm text-base-content/60">{total} accounts</p>
         </div>
         <div className="flex items-center gap-2">
-          <IconButton loading={loading} title="Refresh" onClick={onRefresh} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </IconButton>
-          <Button
+          <button
+            title="Refresh"
+            onClick={onRefresh}
+            aria-label="Refresh"
+            type="button"
+            className="btn btn-square btn-sm btn-ghost"
+            disabled={loading}
+            aria-busy={Boolean(loading) || undefined}
+          >
+            {loading ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+          </button>
+          <button
             type="button"
             onClick={() => onCreateToggle(!showCreate)}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700"
+            className="btn btn-primary"
           >
             <UserPlus className="h-4 w-4" />
             New user
-          </Button>
+          </button>
         </div>
       </div>
 
       {showCreate ? <CreateUserForm onCreated={onCreated} /> : null}
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_390px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-          <div className="border-b border-line p-4">
-            <form onSubmit={submitSearch} className="flex gap-2">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+        <div className="card border border-base-300 bg-base-100 shadow-xs">
+          <div className="border-b border-base-300 p-4">
+            <form onSubmit={submitSearch} className="flex items-center gap-2">
+              <div className="relative flex min-w-0 flex-1 items-center">
+                <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
                 <input
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="Username or address"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="input w-full pl-9 pr-3"
                 />
               </div>
-              <Button
-                loading={loading}
+              <button
                 type="submit"
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+                className="btn btn-outline"
+                disabled={loading}
+                aria-busy={Boolean(loading) || undefined}
               >
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <Search className="h-4 w-4" />
                 Search
-              </Button>
+              </button>
             </form>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <table className="table table-sm table-zebra w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Address</th>
-                  <th className="px-4 py-3">Quota</th>
-                  <th className="px-4 py-3">Status</th>
+                  <th>User</th>
+                  <th>Address</th>
+                  <th>Quota</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {users.map(user => {
                   const status = userStatus(user);
                   const active = selectedUser?.id === user.id;
@@ -446,53 +470,50 @@ function UsersView({
                     <tr
                       key={user.id}
                       onClick={() => onSelect(user)}
-                      className={`cursor-pointer transition ${active ? 'bg-brand-50 dark:bg-teal-950' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      className={`cursor-pointer transition ${active ? 'bg-primary/10' : 'hover:bg-base-200'}`}
                     >
-                      <td className="px-4 py-3">
-                        <Button
+                      <td>
+                        <button
                           type="button"
                           onClick={event => {
                             event.stopPropagation();
                             onSelect(user);
                           }}
-                          className="font-semibold hover:text-brand-700 dark:hover:text-teal-300"
+                          className="btn btn-sm btn-outline"
                         >
                           {selectingId === user.id ? (
-                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                            <span aria-hidden="true" className="loading loading-spinner size-4" />
                           ) : null}
                           {user.username}
-                        </Button>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {user.name || '-'}
-                        </div>
+                        </button>
+                        <div className="text-xs text-base-content/60">{user.name || '-'}</div>
                         <div className="mt-1 flex items-center gap-1">
-                          <code className="select-all text-[11px] text-slate-500 dark:text-slate-400">
+                          <code className="select-all text-[11px] text-base-content/60">
                             {user.id}
                           </code>
                           <CopyButton value={user.id} title={`Copy ${user.username} user ID`} />
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {user.address || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                      <td className="text-base-content/70">{user.address || '-'}</td>
+                      <td className="text-base-content/70">
                         {formatBytes(user.quota?.used)} / {formatBytes(user.quota?.allowed)}
                       </td>
-                      <td className="px-4 py-3">
-                        <StatusPill label={status.label} tone={status.tone} />
+                      <td>
+                        <span
+                          className={`badge badge-sm badge-soft ${{ success: 'badge-success', warning: 'badge-warning', danger: 'badge-error', muted: 'badge-ghost' }[status.tone]}`}
+                        >
+                          {status.label}
+                        </span>
                       </td>
                     </tr>
                   );
                 })}
                 {!users.length ? (
                   <tr>
-                    <td
-                      className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                      colSpan={4}
-                    >
+                    <td className="text-center text-base-content/60" colSpan={4}>
                       {loading ? (
                         <span role="status" className="inline-flex items-center gap-2">
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
+                          <span aria-hidden="true" className="loading loading-spinner size-4" />
                           Loading users…
                         </span>
                       ) : (
@@ -505,36 +526,50 @@ function UsersView({
             </table>
           </div>
 
-          <div className="flex items-center justify-between border-t border-line px-4 py-3">
-            <div className="text-sm text-slate-500 dark:text-slate-400">{users.length} shown</div>
+          <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+            <div className="text-sm text-base-content/60">{users.length} shown</div>
             <div className="flex gap-2">
-              <IconButton
-                loading={loading}
+              <button
                 title="Previous page"
                 onClick={onPrevious}
-                disabled={!previousCursor}
+                aria-label="Previous page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!previousCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </IconButton>
-              <IconButton
-                loading={loading}
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+              <button
                 title="Next page"
                 onClick={onNext}
-                disabled={!nextCursor}
+                aria-label="Next page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!nextCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronRight className="h-4 w-4" />
-              </IconButton>
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
         </div>
 
         {selectingId ? (
-          <aside className="rounded-lg border border-line bg-white dark:bg-slate-900 p-6">
+          <aside className="card border border-base-300 bg-base-100 p-6">
             <div
               role="status"
-              className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400"
+              className="flex items-center justify-center gap-2 text-sm text-base-content/60"
             >
-              <LoaderCircle className="h-4 w-4 animate-spin" />
+              <span aria-hidden="true" className="loading loading-spinner size-4" />
               Loading user details…
             </div>
           </aside>
@@ -599,40 +634,49 @@ function CreateUserForm({ onCreated }: { onCreated: (id: string) => void }) {
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
+      className="card border border-base-300 bg-base-100 p-4 shadow-xs"
     >
       <div className="grid gap-3 md:grid-cols-5">
-        <Field label="Username">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Username</span>
           <input
             value={username}
             onChange={event => setUsername(event.target.value)}
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Password">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Password</span>
           <input
             value={password}
             onChange={event => setPassword(event.target.value)}
             type="password"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Address">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Address</span>
           <input
             value={address}
             onChange={event => setAddress(event.target.value)}
             type="email"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Name">
-          <input value={name} onChange={event => setName(event.target.value)} className="input" />
-        </Field>
-        <Field label="Quota">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Name</span>
+          <input
+            value={name}
+            onChange={event => setName(event.target.value)}
+            className="input w-full"
+          />
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Quota</span>
           <select
             value={quota}
             onChange={event => setQuota(Number(event.target.value))}
-            className="input"
+            className="select w-full"
           >
             {quotaChoices.map(choice => (
               <option key={choice.label} value={choice.value}>
@@ -640,30 +684,31 @@ function CreateUserForm({ onCreated }: { onCreated: (id: string) => void }) {
               </option>
             ))}
           </select>
-        </Field>
+        </label>
       </div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+        <label className="inline-flex items-center gap-2 text-sm text-base-content/80">
           <input
             type="checkbox"
             checked={requirePasswordChange}
             onChange={event => setRequirePasswordChange(event.target.checked)}
-            className="h-4 w-4 rounded-sm border-line text-brand-600 dark:text-teal-300 focus:ring-brand-500"
+            className="checkbox checkbox-primary checkbox-sm"
           />
           Require password change
         </label>
-        <Button
-          loading={busy}
+        <button
           type="submit"
+          className="btn btn-primary"
           disabled={busy}
-          className="inline-flex h-9 items-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-busy={Boolean(busy) || undefined}
         >
+          {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
           <Plus className="h-4 w-4" />
           Create
-        </Button>
+        </button>
       </div>
       {error ? (
-        <div className="mt-3 flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+        <div className="alert alert-error alert-soft mt-3">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
@@ -878,8 +923,8 @@ function UserDetailPanel({
 
   if (!user) {
     return (
-      <aside className="rounded-lg border border-dashed border-line bg-white dark:bg-slate-900 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        <Users className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+      <aside className="card border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/60">
+        <Users className="mx-auto mb-3 h-8 w-8 text-base-content/30" />
         No user selected
       </aside>
     );
@@ -887,124 +932,167 @@ function UserDetailPanel({
 
   return (
     <aside className="space-y-4">
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
+      <div className="card border border-base-300 bg-base-100 p-4 shadow-xs">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="truncate font-display text-lg font-semibold">{user.username}</h3>
-            <p className="truncate text-sm text-slate-500 dark:text-slate-400">
+            <p className="truncate text-sm text-base-content/60">
               {user.address || user.name || user.id}
             </p>
           </div>
-          <StatusPill label={status.label} tone={status.tone} />
+          <span
+            className={`badge badge-sm badge-soft ${{ success: 'badge-success', warning: 'badge-warning', danger: 'badge-error', muted: 'badge-ghost' }[status.tone]}`}
+          >
+            {status.label}
+          </span>
         </div>
 
-        <div className="mb-4 rounded-lg border border-line bg-slate-50 dark:bg-slate-800 p-3">
-          <p className="mb-1 text-xs font-semibold text-slate-500 dark:text-slate-400">User ID</p>
+        <div className="mb-4 card card-border rounded-box bg-base-200 p-3">
+          <p className="mb-1 text-xs font-semibold text-base-content/60">User ID</p>
           <div className="flex items-center gap-2">
             <code className="min-w-0 flex-1 select-all break-all text-xs">{user.id}</code>
             <CopyButton value={user.id} title="Copy user ID" />
           </div>
-          <Button
-            type="button"
-            className="mt-2 text-sm font-semibold text-brand-700 dark:text-teal-300 hover:underline"
-            onClick={() => onSecurity(user.id)}
-          >
+          <button type="button" className="btn btn-ghost mt-2" onClick={() => onSecurity(user.id)}>
             <Shield className="h-4 w-4" />
             Open security log
-          </Button>
+          </button>
         </div>
         <dl className="grid grid-cols-2 gap-3 text-sm">
-          <Info label="Name" value={user.name || '-'} />
-          <Info label="Password" value={user.hasPasswordSet ? 'Set' : 'Not set'} />
-          <Info label="2FA" value={user.enabled2fa?.length ? user.enabled2fa.join(', ') : '-'} />
-          <Info
-            label="Spam level"
-            value={user.spamLevel === undefined ? '-' : String(user.spamLevel)}
-          />
-          <Info
-            label="Quota"
-            value={`${formatBytes(quota?.used)} / ${formatBytes(quota?.allowed)}`}
-            wide
-          />
-          <Info label="Tags" value={user.tags?.length ? user.tags.join(', ') : '-'} wide />
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Name'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">{user.name || '-'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Password'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">
+              {user.hasPasswordSet ? 'Set' : 'Not set'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'2FA'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">
+              {user.enabled2fa?.length ? user.enabled2fa.join(', ') : '-'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Spam level'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">
+              {user.spamLevel === undefined ? '-' : String(user.spamLevel)}
+            </dd>
+          </div>
+          <div className="col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Quota'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">{`${formatBytes(quota?.used)} / ${formatBytes(quota?.allowed)}`}</dd>
+          </div>
+          <div className="col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Tags'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">
+              {user.tags?.length ? user.tags.join(', ') : '-'}
+            </dd>
+          </div>
         </dl>
       </div>
 
       <form
         onSubmit={saveUser}
         noValidate
-        className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
+        className="card border border-base-300 bg-base-100 p-4 shadow-xs"
       >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+            <Shield className="h-4 w-4 text-primary" />
             <h3 className="font-semibold">Account</h3>
           </div>
-          <IconButton
-            loading={deletingUser}
+          <button
             title="Delete user"
             onClick={() => setPendingUserDelete(true)}
-            disabled={savingUser || deletingUser}
+            aria-label="Delete user"
+            type="button"
+            className="btn btn-square btn-sm btn-error btn-soft"
+            disabled={savingUser || deletingUser || deletingUser}
+            aria-busy={Boolean(deletingUser) || undefined}
           >
-            <Trash2 className="h-4 w-4" />
-          </IconButton>
+            {deletingUser ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </button>
         </div>
         <div className="space-y-3">
-          <Field label="Name">
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Name</span>
             <input
               value={nameDraft}
               onChange={event => setNameDraft(event.target.value)}
-              className="input"
+              className="input w-full"
             />
-          </Field>
+          </label>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Quota bytes">
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">Quota bytes</span>
               <input
                 value={quotaDraft}
                 onChange={event => setQuotaDraft(event.target.value)}
                 type="number"
                 min="0"
-                className="input"
+                className="input w-full"
               />
-            </Field>
-            <Field label="Spam level">
+            </label>
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">Spam level</span>
               <input
                 value={spamLevelDraft}
                 onChange={event => setSpamLevelDraft(event.target.value)}
                 type="number"
-                className="input"
+                className="input w-full"
               />
-            </Field>
+            </label>
           </div>
-          <Field label="Tags">
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Tags</span>
             <input
               value={tagsDraft}
               onChange={event => setTagsDraft(event.target.value)}
-              className="input"
+              className="input w-full"
               placeholder="vip, internal"
             />
-          </Field>
-          <Field label="Custom metadata (JSON)">
+          </label>
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Custom metadata (JSON)</span>
             <textarea
               value={metadataDraft}
               onChange={event => setMetadataDraft(event.target.value)}
               rows={6}
               spellCheck={false}
-              className="input font-mono text-xs"
+              className="textarea w-full font-mono text-xs"
               aria-describedby="user-metadata-help"
             />
-          </Field>
-          <p id="user-metadata-help" className="text-xs text-slate-500 dark:text-slate-400">
+          </label>
+          <p id="user-metadata-help" className="text-xs text-base-content/60">
             Add custom fields as a JSON object, for example {'{"department": "Sales"}'}. Saving
             replaces the metadata object; use {'{}'} to clear it.
           </p>
-          <div className="grid gap-2 text-sm text-slate-700 dark:text-slate-200">
+          <div className="grid gap-2 text-sm text-base-content/80">
             <label className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={disabledDraft}
                 onChange={event => setDisabledDraft(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Disabled
             </label>
@@ -1013,7 +1101,7 @@ function UserDetailPanel({
                 type="checkbox"
                 checked={suspendedDraft}
                 onChange={event => setSuspendedDraft(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Suspended
             </label>
@@ -1022,7 +1110,7 @@ function UserDetailPanel({
                 type="checkbox"
                 checked={require2faDraft}
                 onChange={event => setRequire2faDraft(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Require 2FA
             </label>
@@ -1031,127 +1119,153 @@ function UserDetailPanel({
                 type="checkbox"
                 checked={disable2faDraft}
                 onChange={event => setDisable2faDraft(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Disable current 2FA
             </label>
           </div>
           {userError ? (
-            <div className="flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+            <div className="alert alert-error alert-soft">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span className="min-w-0 break-words">{userError}</span>
             </div>
           ) : null}
-          <Button
-            loading={savingUser}
+          <button
             type="submit"
+            className="btn btn-primary w-full"
             disabled={savingUser}
-            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={Boolean(savingUser) || undefined}
           >
+            {savingUser ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
             <Save className="h-4 w-4" />
             Save user
-          </Button>
+          </button>
         </div>
       </form>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-        <div className="flex items-center gap-2 border-b border-line px-4 py-3">
-          <Mail className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+      <div className="card border border-base-300 bg-base-100 shadow-xs">
+        <div className="flex items-center gap-2 border-b border-base-300 px-4 py-3">
+          <Mail className="h-4 w-4 text-primary" />
           <h3 className="font-semibold">Addresses</h3>
         </div>
-        <div className="divide-y divide-line">
+        <div className="divide-y divide-base-300">
           {addresses.map(item => (
             <div key={item.id} className="px-4 py-3 text-sm">
               <div className="flex items-center justify-between gap-2">
                 <span className="min-w-0 break-all font-medium">{item.address || item.id}</span>
                 <div className="flex shrink-0 items-center gap-2">
-                  {item.main ? <StatusPill label="Main" tone="success" /> : null}
+                  {item.main ? (
+                    <span className="badge badge-sm badge-soft badge-success">Main</span>
+                  ) : null}
                   {!item.main ? (
-                    <IconButton
-                      loading={addressBusy === item.id}
+                    <button
                       title="Set as main address"
                       onClick={() => makeAddressMain(item)}
-                      disabled={Boolean(addressBusy)}
+                      aria-label="Set as main address"
+                      type="button"
+                      className="btn btn-square btn-sm btn-ghost"
+                      disabled={Boolean(addressBusy) || addressBusy === item.id}
+                      aria-busy={Boolean(addressBusy === item.id) || undefined}
                     >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </IconButton>
+                      {addressBusy === item.id ? (
+                        <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4" />
+                      )}
+                    </button>
                   ) : null}
-                  <IconButton
-                    loading={addressBusy === item.id}
+                  <button
                     title="Delete address"
                     onClick={() => setPendingAddressDelete(item)}
-                    disabled={Boolean(addressBusy)}
+                    aria-label="Delete address"
+                    type="button"
+                    className="btn btn-square btn-sm btn-error btn-soft"
+                    disabled={Boolean(addressBusy) || addressBusy === item.id}
+                    aria-busy={Boolean(addressBusy === item.id) || undefined}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </IconButton>
+                    {addressBusy === item.id ? (
+                      <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                  </button>
                 </div>
               </div>
-              <div className="text-slate-500 dark:text-slate-400">{item.name || '-'}</div>
+              <div className="text-base-content/60">{item.name || '-'}</div>
               {item.targets?.length ? (
-                <div className="mt-1 break-all text-xs text-slate-500 dark:text-slate-400">
+                <div className="mt-1 break-all text-xs text-base-content/60">
                   {item.targets.join(', ')}
                 </div>
               ) : null}
             </div>
           ))}
           {!addresses.length ? (
-            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-              No addresses
-            </div>
+            <div className="px-4 py-6 text-center text-sm text-base-content/60">No addresses</div>
           ) : null}
         </div>
         {addressError ? (
-          <div className="mx-4 mt-4 flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+          <div className="alert alert-error alert-soft mx-4 mt-4">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span className="min-w-0 break-words">{addressError}</span>
           </div>
         ) : null}
-        <form onSubmit={submit} noValidate className="space-y-3 border-t border-line p-4">
-          <Field label="Address">
+        <form onSubmit={submit} noValidate className="space-y-3 border-t border-base-300 p-4">
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Address</span>
             <input
               value={address}
               onChange={event => setAddress(event.target.value)}
-              className="input"
+              className="input w-full"
             />
-          </Field>
-          <Field label="Name">
-            <input value={name} onChange={event => setName(event.target.value)} className="input" />
-          </Field>
+          </label>
+          <label className="fieldset min-w-0">
+            <span className="fieldset-legend">Name</span>
+            <input
+              value={name}
+              onChange={event => setName(event.target.value)}
+              className="input w-full"
+            />
+          </label>
           <div className="flex flex-wrap gap-3">
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <label className="inline-flex items-center gap-2 text-sm text-base-content/80">
               <input
                 type="checkbox"
                 checked={main}
                 onChange={event => setMain(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Main
             </label>
-            <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <label className="inline-flex items-center gap-2 text-sm text-base-content/80">
               <input
                 type="checkbox"
                 checked={allowWildcard}
                 onChange={event => setAllowWildcard(event.target.checked)}
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
               />
               Wildcard
             </label>
           </div>
           {error ? (
-            <div className="flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+            <div className="alert alert-error alert-soft">
               <AlertCircle className="h-4 w-4" />
               {error}
             </div>
           ) : null}
-          <Button
-            loading={busy}
+          <button
             type="submit"
+            className="btn btn-outline btn-primary w-full"
             disabled={busy}
-            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-brand-600 bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-brand-700 dark:text-teal-300 transition hover:bg-brand-50 dark:hover:bg-teal-950 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={Boolean(busy) || undefined}
           >
+            {busy ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
             <Plus className="h-4 w-4" />
             Add address
-          </Button>
+          </button>
         </form>
       </div>
 
@@ -1162,7 +1276,7 @@ function UserDetailPanel({
           pendingAddressDelete ? (
             <>
               Delete{' '}
-              <strong className="break-all text-ink">
+              <strong className="break-all text-base-content">
                 {pendingAddressDelete.address || pendingAddressDelete.id}
               </strong>
               ?
@@ -1180,8 +1294,8 @@ function UserDetailPanel({
         title="Delete user"
         message={
           <>
-            Delete <strong className="break-all text-ink">{user.username}</strong> and its mailbox
-            data?
+            Delete <strong className="break-all text-base-content">{user.username}</strong> and its
+            mailbox data?
           </>
         }
         confirmLabel="Delete user"
@@ -1191,30 +1305,6 @@ function UserDetailPanel({
       />
     </aside>
   );
-}
-
-function Info({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
-  return (
-    <div className={wide ? 'col-span-2' : ''}>
-      <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {label}
-      </dt>
-      <dd className="mt-1 break-words font-medium text-slate-800 dark:text-slate-100">{value}</dd>
-    </div>
-  );
-}
-
-function formatDate(value?: string) {
-  if (!value) {
-    return '-';
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString();
 }
 
 function DkimView({
@@ -1258,80 +1348,85 @@ function DkimView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">DKIM</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{total} keys</p>
+          <p className="text-sm text-base-content/60">{total} keys</p>
         </div>
-        <IconButton loading={loading} title="Refresh" onClick={onRefresh} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </IconButton>
+        <button
+          title="Refresh"
+          onClick={onRefresh}
+          aria-label="Refresh"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
+          disabled={loading}
+          aria-busy={Boolean(loading) || undefined}
+        >
+          {loading ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-          <div className="border-b border-line p-4">
+        <div className="card border border-base-300 bg-base-100 shadow-xs">
+          <div className="border-b border-base-300 p-4">
             <form onSubmit={submitSearch} className="flex gap-2">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <div className="relative flex min-w-0 flex-1 items-center">
+                <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
                 <input
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="Domain"
-                  className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                  className="input w-full pl-9 pr-3"
                 />
               </div>
-              <Button
-                loading={loading}
+              <button
                 type="submit"
-                className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+                className="btn btn-outline"
+                disabled={loading}
+                aria-busy={Boolean(loading) || undefined}
               >
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <Search className="h-4 w-4" />
                 Search
-              </Button>
+              </button>
             </form>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <table className="table table-sm table-zebra w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Domain</th>
-                  <th className="px-4 py-3">Selector</th>
-                  <th className="px-4 py-3">Fingerprint</th>
-                  <th className="px-4 py-3">Created</th>
+                  <th>Domain</th>
+                  <th>Selector</th>
+                  <th>Fingerprint</th>
+                  <th>Created</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {keys.map(key => {
                   const active = selectedKey?.id === key.id;
                   return (
                     <tr
                       key={key.id}
                       onClick={() => onSelect(key)}
-                      className={`cursor-pointer transition ${active ? 'bg-brand-50 dark:bg-teal-950' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      className={`cursor-pointer transition ${active ? 'bg-primary/10' : 'hover:bg-base-200'}`}
                     >
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="font-medium">{key.domain}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">
-                          {key.description || '-'}
-                        </div>
+                        <div className="text-xs text-base-content/60">{key.description || '-'}</div>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {key.selector}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">
-                        {key.fingerprint}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {formatDate(key.created)}
-                      </td>
+                      <td className="text-base-content/70">{key.selector}</td>
+                      <td className="font-mono text-xs text-base-content/70">{key.fingerprint}</td>
+                      <td className="text-base-content/70">{formatDate(key.created)}</td>
                     </tr>
                   );
                 })}
                 {!keys.length ? (
                   <tr>
-                    <td
-                      className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                      colSpan={4}
-                    >
+                    <td className="text-center text-base-content/60" colSpan={4}>
                       No DKIM keys found
                     </td>
                   </tr>
@@ -1340,25 +1435,39 @@ function DkimView({
             </table>
           </div>
 
-          <div className="flex items-center justify-between border-t border-line px-4 py-3">
-            <div className="text-sm text-slate-500 dark:text-slate-400">{keys.length} shown</div>
+          <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+            <div className="text-sm text-base-content/60">{keys.length} shown</div>
             <div className="flex gap-2">
-              <IconButton
-                loading={loading}
+              <button
                 title="Previous page"
                 onClick={onPrevious}
-                disabled={!previousCursor}
+                aria-label="Previous page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!previousCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </IconButton>
-              <IconButton
-                loading={loading}
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+              <button
                 title="Next page"
                 onClick={onNext}
-                disabled={!nextCursor}
+                aria-label="Next page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!nextCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronRight className="h-4 w-4" />
-              </IconButton>
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -1416,65 +1525,67 @@ function DkimCreateForm({ onCreate }: { onCreate: (input: DkimCreateInput) => Pr
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
+      className="card border border-base-300 bg-base-100 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
-        <KeyRound className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+        <KeyRound className="h-4 w-4 text-primary" />
         <h3 className="font-semibold">Create or update key</h3>
       </div>
       <div className="space-y-3">
-        <Field label="Domain">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Domain</span>
           <input
             value={domain}
             onChange={event => setDomain(event.target.value)}
-            className="input"
+            className="input w-full"
             placeholder="mail domain, for example example.com"
           />
-        </Field>
-        <Field label="Selector">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Selector</span>
           <input
             value={selector}
             onChange={event => setSelector(event.target.value)}
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Description">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Description</span>
           <input
             value={description}
             onChange={event => setDescription(event.target.value)}
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Private key">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Private key</span>
           <textarea
             value={privateKey}
             onChange={event => setPrivateKey(event.target.value)}
             aria-describedby="dkim-private-key-help"
-            className="min-h-28 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="textarea w-full min-h-28 font-mono text-xs"
           />
-          <span
-            id="dkim-private-key-help"
-            className="mt-1 block text-xs text-slate-500 dark:text-slate-400"
-          >
+          <span id="dkim-private-key-help" className="mt-1 block text-xs text-base-content/60">
             Leave blank to automatically generate a 2048-bit RSA key.
           </span>
-        </Field>
+        </label>
       </div>
       {error ? (
-        <div className="mt-3 flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+        <div className="alert alert-error alert-soft mt-3">
           <AlertCircle className="h-4 w-4" />
           {error}
         </div>
       ) : null}
-      <Button
-        loading={busy}
+      <button
         type="submit"
+        className="btn btn-primary mt-3 w-full"
         disabled={busy}
-        className="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-busy={Boolean(busy) || undefined}
       >
+        {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
         <Save className="h-4 w-4" />
         Save DKIM key
-      </Button>
+      </button>
     </form>
   );
 }
@@ -1509,58 +1620,78 @@ function DkimDetailPanel({
 
   if (!selectedKey) {
     return (
-      <div className="rounded-lg border border-dashed border-line bg-white dark:bg-slate-900 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        <KeyRound className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+      <div className="card border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/60">
+        <KeyRound className="mx-auto mb-3 h-8 w-8 text-base-content/30" />
         No DKIM key selected
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-      <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
+    <div className="card border border-base-300 bg-base-100 shadow-xs">
+      <div className="flex items-start justify-between gap-3 border-b border-base-300 px-4 py-3">
         <div className="min-w-0">
           <h3 className="truncate font-display text-lg font-semibold">{selectedKey.domain}</h3>
-          <p className="truncate text-sm text-slate-500 dark:text-slate-400">
-            {selectedKey.selector}
-          </p>
+          <p className="truncate text-sm text-base-content/60">{selectedKey.selector}</p>
         </div>
-        <IconButton
-          loading={busy}
+        <button
           title="Delete DKIM key"
           onClick={() => setConfirmOpen(true)}
+          aria-label="Delete DKIM key"
+          type="button"
+          className="btn btn-square btn-sm btn-error btn-soft"
           disabled={busy}
+          aria-busy={Boolean(busy) || undefined}
         >
-          <Trash2 className="h-4 w-4" />
-        </IconButton>
+          {busy ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       <div className="space-y-4 p-4 text-sm">
         <dl className="grid grid-cols-2 gap-3">
-          <Info label="Fingerprint" value={selectedKey.fingerprint} wide />
-          <Info label="Created" value={formatDate(selectedKey.created)} />
-          <Info label="Description" value={selectedKey.description || '-'} />
+          <div className="col-span-2">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Fingerprint'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">{selectedKey.fingerprint}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Created'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">{formatDate(selectedKey.created)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
+              {'Description'}
+            </dt>
+            <dd className="mt-1 break-words font-medium">{selectedKey.description || '-'}</dd>
+          </div>
         </dl>
 
         {selectedKey.dnsTxt ? (
           <div className="space-y-3">
             <div>
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-base-content/60">
                 TXT name
               </div>
               <div className="flex items-center gap-2">
-                <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-base-200 px-3 py-2 text-xs">
                   {selectedKey.dnsTxt.name}
                 </code>
                 <CopyButton value={selectedKey.dnsTxt.name} title="Copy TXT name" />
               </div>
             </div>
             <div>
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-base-content/60">
                 TXT value
               </div>
               <div className="flex items-start gap-2">
-                <code className="min-w-0 flex-1 break-all rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2 text-xs">
+                <code className="min-w-0 flex-1 break-all rounded-lg bg-base-200 px-3 py-2 text-xs">
                   {selectedKey.dnsTxt.value}
                 </code>
                 <CopyButton value={selectedKey.dnsTxt.value} title="Copy TXT value" />
@@ -1568,22 +1699,22 @@ function DkimDetailPanel({
             </div>
           </div>
         ) : (
-          <div className="rounded-lg border border-line bg-slate-50 dark:bg-slate-800 px-3 py-2 text-slate-500 dark:text-slate-400">
+          <div className="card card-border rounded-box bg-base-200 px-3 py-2 text-base-content/60">
             DNS TXT data is loaded when opening key details.
           </div>
         )}
 
         {selectedKey.publicKey ? (
-          <details className="rounded-lg border border-line bg-slate-50 dark:bg-slate-800 px-3 py-2">
-            <summary className="cursor-pointer text-sm font-semibold">Public key</summary>
-            <code className="mt-2 block break-all text-xs text-slate-600 dark:text-slate-300">
+          <details className="collapse collapse-arrow border border-base-300 bg-base-200">
+            <summary className="collapse-title text-sm font-semibold">Public key</summary>
+            <code className="collapse-content block break-all text-xs text-base-content/70">
               {selectedKey.publicKey}
             </code>
           </details>
         ) : null}
 
         {error ? (
-          <div className="flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300">
+          <div className="alert alert-error alert-soft">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>
@@ -1594,8 +1725,8 @@ function DkimDetailPanel({
         title="Delete DKIM key"
         message={
           <>
-            Delete DKIM key for <strong className="break-all text-ink">{selectedKey.domain}</strong>
-            ?
+            Delete DKIM key for{' '}
+            <strong className="break-all text-base-content">{selectedKey.domain}</strong>?
           </>
         }
         confirmLabel="Delete key"
@@ -1699,7 +1830,7 @@ function EditableSettingValue({
           <select
             value={draft}
             onChange={event => setDraft(event.target.value)}
-            className="input h-9 min-w-24"
+            className="select w-full"
           >
             <option value="true">true</option>
             <option value="false">false</option>
@@ -1709,31 +1840,35 @@ function EditableSettingValue({
             value={draft}
             onChange={event => setDraft(event.target.value)}
             type={numericSetting ? 'number' : 'text'}
-            className="input h-9 min-w-0"
+            className="input w-full"
             aria-label={`${setting.key} value`}
           />
         )}
-        <Button
-          loading={saving}
+        <button
           type="submit"
           title="Save setting"
           aria-label={`Save ${setting.key}`}
-          disabled={!dirty || saving}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-xs transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-outline w-9 btn-square btn-sm"
+          disabled={!dirty || saving || saving}
+          aria-busy={Boolean(saving) || undefined}
         >
+          {saving ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : null}
           <Save className="h-4 w-4" />
-        </Button>
-        <IconButton
+        </button>
+        <button
           title="Discard edits"
           onClick={() => setDraft(String(setting.value))}
           disabled={!dirty || saving}
+          aria-label="Discard edits"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
         >
           <RotateCcw className="h-4 w-4" />
-        </IconButton>
+        </button>
       </div>
-      {error ? (
-        <div className="text-xs font-medium text-rose-700 dark:text-rose-300">{error}</div>
-      ) : null}
+      {error ? <div className="text-xs font-medium text-error">{error}</div> : null}
     </form>
   );
 }
@@ -1784,109 +1919,109 @@ function SettingsView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Settings</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-base-content/60">
             {visibleSettings.length} of {settings.length} settings
           </p>
         </div>
-        <IconButton loading={loading} title="Refresh" onClick={onRefresh} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </IconButton>
+        <button
+          title="Refresh"
+          onClick={onRefresh}
+          aria-label="Refresh"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
+          disabled={loading}
+          aria-busy={Boolean(loading) || undefined}
+        >
+          {loading ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-        <div className="border-b border-line p-4">
+      <div className="card border border-base-300 bg-base-100 shadow-xs">
+        <div className="border-b border-base-300 p-4">
           <div className="flex gap-2">
-            <div className="relative min-w-0 flex-1">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <div className="relative flex min-w-0 flex-1 items-center">
+              <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
               <input
                 value={filter}
                 onChange={event => setFilter(event.target.value)}
                 placeholder="Search settings by key or description"
                 aria-label="Search settings"
-                className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                className="input w-full pl-9 pr-3"
               />
             </div>
             {filter ? (
-              <Button
-                type="button"
-                onClick={() => setFilter('')}
-                className="border border-line px-3 text-sm text-slate-600 dark:text-slate-300"
-              >
+              <button type="button" onClick={() => setFilter('')} className="btn btn-outline">
                 Clear
-              </Button>
+              </button>
             ) : null}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {categories
               .filter(item => !item.value || item.count > 0)
               .map(item => (
-                <Button
+                <button
                   key={item.label}
                   type="button"
                   aria-pressed={category === item.value}
                   onClick={() => setCategory(item.value)}
-                  className={`inline-flex h-8 items-center rounded-lg border px-3 text-xs font-semibold transition ${
-                    category === item.value
-                      ? 'border-brand-600 bg-brand-50 dark:bg-teal-950 text-brand-700 dark:text-teal-300'
-                      : 'border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300'
-                  }`}
+                  className={`btn btn-sm ${category === item.value ? 'btn-primary' : 'btn-ghost'}`}
                 >
                   {item.label} <span className="ml-1 opacity-70">{item.count}</span>
-                </Button>
+                </button>
               ))}
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-line text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <table className="table table-sm table-zebra w-full">
+            <thead>
               <tr>
-                <th className="px-4 py-3">Key</th>
-                <th className="px-4 py-3">Value</th>
-                <th className="px-4 py-3">Default</th>
-                <th className="px-4 py-3">Type</th>
+                <th>Key</th>
+                <th>Value</th>
+                <th>Default</th>
+                <th>Type</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody>
               {visibleSettings.map(setting => (
                 <tr key={setting.key}>
-                  <td className="px-4 py-3">
+                  <td>
                     <div className="font-medium">{setting.key}</div>
-                    <div className="max-w-xl text-xs text-slate-500 dark:text-slate-400">
+                    <div className="max-w-xl text-xs text-base-content/60">
                       {setting.description || setting.name || '-'}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
+                  <td className="text-base-content/80">
                     <EditableSettingValue setting={setting} onUpdate={onUpdate} />
                   </td>
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                    {String(setting.default ?? '-')}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusPill
-                      label={settingIsCustom(setting) ? 'Custom' : setting.type || 'Default'}
-                      tone={settingIsCustom(setting) ? 'success' : 'muted'}
-                    />
+                  <td className="text-base-content/60">{String(setting.default ?? '-')}</td>
+                  <td>
+                    <span
+                      className={`badge badge-sm badge-soft ${settingIsCustom(setting) ? 'badge-success' : 'badge-ghost'}`}
+                    >
+                      {settingIsCustom(setting) ? 'Custom' : setting.type || 'Default'}
+                    </span>
                   </td>
                 </tr>
               ))}
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6">
+                  <td colSpan={4}>
                     <div
                       role="status"
-                      className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400"
+                      className="flex items-center justify-center gap-2 text-base-content/60"
                     >
-                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                      <span aria-hidden="true" className="loading loading-spinner size-4" />
                       Loading settings…
                     </div>
                   </td>
                 </tr>
               ) : !visibleSettings.length ? (
                 <tr>
-                  <td
-                    colSpan={4}
-                    className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                  >
+                  <td colSpan={4} className="text-center text-base-content/60">
                     No settings match these filters
                   </td>
                 </tr>
@@ -2009,10 +2144,10 @@ export default function App() {
       current.map(item =>
         item.key === setting.key
           ? {
-              ...item,
-              value,
-              custom: value !== item.default && !settingMatchesDefault({ ...item, value })
-            }
+            ...item,
+            value,
+            custom: value !== item.default && !settingMatchesDefault({ ...item, value })
+          }
           : item
       )
     );
@@ -2140,8 +2275,8 @@ export default function App() {
 
   if (booting) {
     return (
-      <main className="grid min-h-screen place-items-center bg-mist text-sm text-slate-500 dark:text-slate-400">
-        <RefreshCw className="mb-3 h-6 w-6 animate-spin text-brand-600 dark:text-teal-300" />
+      <main className="grid min-h-screen place-items-center bg-base-200 text-sm text-base-content/60">
+        <RefreshCw className="mb-3 h-6 w-6 animate-spin text-primary" />
         Loading
       </main>
     );
@@ -2163,12 +2298,9 @@ export default function App() {
   return (
     <Shell session={session} view={view} onView={setView} onLogout={handleLogout}>
       {notice || refreshingNotice ? (
-        <div className="pointer-events-none fixed right-4 top-24 z-40 w-[min(calc(100vw-2rem),420px)] space-y-2">
+        <div className="toast toast-top toast-end pointer-events-none top-24 z-40 max-w-[calc(100vw-2rem)]">
           {refreshingNotice ? (
-            <div
-              key={refreshingNotice}
-              className="toast-active pointer-events-auto flex items-start gap-3 rounded-lg border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950 px-4 py-3 text-sm text-sky-800 dark:text-sky-200 shadow-panel"
-            >
+            <div key={refreshingNotice} className="alert alert-info alert-soft pointer-events-auto">
               <RefreshCw className="mt-0.5 h-4 w-4 shrink-0 animate-spin" />
               <span className="min-w-0 break-words">{refreshingNotice}</span>
             </div>
@@ -2178,7 +2310,7 @@ export default function App() {
               key={notice}
               role="status"
               aria-live="polite"
-              className={`toast-notice pointer-events-auto flex items-start justify-between gap-3 rounded-lg border px-4 py-3 text-sm shadow-panel ${noticeTone === 'success' ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200' : 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-200'}`}
+              className={`alert alert-soft pointer-events-auto ${noticeTone === 'success' ? 'alert-success' : 'alert-warning'}`}
             >
               <span className="flex min-w-0 items-start gap-2">
                 {noticeTone === 'success' ? (
@@ -2188,13 +2320,13 @@ export default function App() {
                 )}
                 <span className="break-words">{notice}</span>
               </span>
-              <Button
+              <button
                 type="button"
                 onClick={() => setNotice('')}
-                className="shrink-0 font-semibold"
+                className="btn btn-ghost btn-sm shrink-0"
               >
                 Dismiss
-              </Button>
+              </button>
             </div>
           ) : null}
         </div>

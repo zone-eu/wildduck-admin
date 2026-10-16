@@ -4,13 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&amp;display=swap"
+    />
     <title>WildDuck Admin UI</title>
     <script>
       try {
         const theme = localStorage.getItem('admin-theme');
-        document.documentElement.classList.toggle('dark', theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle(
+          'dark',
+          theme ? theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+        );
       } catch {
-        document.documentElement.classList.toggle('dark', matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle(
+          'dark',
+          matchMedia('(prefers-color-scheme: dark)').matches
+        );
       }
     </script>
   </head>

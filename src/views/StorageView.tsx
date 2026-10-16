@@ -1,16 +1,15 @@
-import { ChevronLeft, ChevronRight, FileSearch, RefreshCw, Search, Trash2 } from 'lucide-react';
+import {
+  CaretLeftIcon as ChevronLeft,
+  CaretRightIcon as ChevronRight,
+  FileMagnifyingGlassIcon as FileSearch,
+  ArrowsClockwiseIcon as RefreshCw,
+  MagnifyingGlassIcon as Search,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import { FormEvent, useState } from 'react';
 import { deleteStoredFile, getStoredFiles } from '../api';
 import type { StoredFile } from '../types';
-import {
-  Button,
-  ConfirmDialog,
-  ErrorNotice,
-  Field,
-  IconButton,
-  formatBytes,
-  formatDate
-} from './ui';
+import { ConfirmDialog, formatBytes, formatDate } from './ui';
 
 export function StorageView() {
   const [userId, setUserId] = useState('');
@@ -88,101 +87,112 @@ export function StorageView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Storage</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-base-content/60">
             {loadedUserId ? `${total} files for ${loadedUserId}` : 'Select a user'}
           </p>
         </div>
-        <IconButton
-          loading={loading}
+        <button
           title="Refresh"
           onClick={() => load()}
-          disabled={loading || !loadedUserId}
+          aria-label="Refresh"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
+          disabled={loading || !loadedUserId || loading}
+          aria-busy={Boolean(loading) || undefined}
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </IconButton>
+          {loading ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
+      <div className="card border border-base-300 bg-base-100 p-4 shadow-xs">
         <form
           onSubmit={submit}
           noValidate
-          className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
+          className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
         >
-          <Field label="User ID">
+          <label className="fieldset min-w-0 py-0">
+            <span className="fieldset-legend">User ID</span>
             <input
               value={userId}
               onChange={event => setUserId(event.target.value)}
-              className="input"
+              className="input w-full"
             />
-          </Field>
-          <Field label="Search">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+          </label>
+          <label className="fieldset min-w-0 py-0">
+            <span className="fieldset-legend">Search</span>
+            <div className="relative flex items-center">
+              <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
               <input
                 value={query}
                 onChange={event => setQuery(event.target.value)}
-                className="input pl-9"
+                className="input w-full pl-9"
                 placeholder="Filename or content type"
               />
             </div>
-          </Field>
-          <Button
-            loading={loading}
+          </label>
+          <button
             type="submit"
+            className="btn btn-outline mt-0"
             disabled={loading}
-            className="mt-0 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-60 md:mt-5"
+            aria-busy={Boolean(loading) || undefined}
           >
+            {loading ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
             <FileSearch className="h-4 w-4" />
             Load
-          </Button>
+          </button>
         </form>
       </div>
 
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
+      <div className="card border border-base-300 bg-base-100 shadow-xs">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-line text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <table className="table table-sm w-full">
+            <thead>
               <tr>
-                <th className="px-4 py-3">File</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Size</th>
-                <th className="px-4 py-3">Created</th>
-                <th className="px-4 py-3"></th>
+                <th>File</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Created</th>
+                <th></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody>
               {files.map(file => (
                 <tr key={file.id}>
-                  <td className="px-4 py-3">
+                  <td>
                     <div className="break-all font-medium">{file.filename || '-'}</div>
-                    <div className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                      {file.id}
-                    </div>
+                    <div className="font-mono text-xs text-base-content/60">{file.id}</div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {file.contentType || '-'}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {formatBytes(file.size)}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                    {formatDate(file.created)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <IconButton title="Delete stored file" onClick={() => setPendingDelete(file)}>
+                  <td className="text-base-content/70">{file.contentType || '-'}</td>
+                  <td className="text-base-content/70">{formatBytes(file.size)}</td>
+                  <td className="text-base-content/70">{formatDate(file.created)}</td>
+                  <td className="text-right">
+                    <button
+                      title="Delete stored file"
+                      onClick={() => setPendingDelete(file)}
+                      aria-label="Delete stored file"
+                      type="button"
+                      className="btn btn-square btn-sm btn-error btn-soft"
+                    >
                       <Trash2 className="h-4 w-4" />
-                    </IconButton>
+                    </button>
                   </td>
                 </tr>
               ))}
               {!files.length ? (
                 <tr>
-                  <td
-                    className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                    colSpan={5}
-                  >
+                  <td className="text-center text-base-content/60" colSpan={5}>
                     No stored files loaded
                   </td>
                 </tr>
@@ -190,25 +200,39 @@ export function StorageView() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between border-t border-line px-4 py-3">
-          <div className="text-sm text-slate-500 dark:text-slate-400">{files.length} shown</div>
+        <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+          <div className="text-sm text-base-content/60">{files.length} shown</div>
           <div className="flex gap-2">
-            <IconButton
-              loading={loading}
+            <button
               title="Previous page"
               onClick={() => previousCursor && load({ previous: previousCursor })}
-              disabled={!previousCursor}
+              aria-label="Previous page"
+              type="button"
+              className="btn btn-square btn-sm btn-ghost"
+              disabled={!previousCursor || loading}
+              aria-busy={Boolean(loading) || undefined}
             >
-              <ChevronLeft className="h-4 w-4" />
-            </IconButton>
-            <IconButton
-              loading={loading}
+              {loading ? (
+                <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+              ) : (
+                <ChevronLeft className="h-4 w-4" />
+              )}
+            </button>
+            <button
               title="Next page"
               onClick={() => nextCursor && load({ next: nextCursor })}
-              disabled={!nextCursor}
+              aria-label="Next page"
+              type="button"
+              className="btn btn-square btn-sm btn-ghost"
+              disabled={!nextCursor || loading}
+              aria-busy={Boolean(loading) || undefined}
             >
-              <ChevronRight className="h-4 w-4" />
-            </IconButton>
+              {loading ? (
+                <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -220,7 +244,7 @@ export function StorageView() {
           pendingDelete ? (
             <>
               Delete{' '}
-              <strong className="break-all text-ink">
+              <strong className="break-all text-base-content">
                 {pendingDelete.filename || pendingDelete.id}
               </strong>
               ?
