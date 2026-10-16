@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/zone-eu/wildduck-admin/compare/v0.1.3...v0.1.4) (2026-10-16)
+
+
+### Bug Fixes
+
+* redesign, switch to daisy ui and phosphor icons ([#7](https://github.com/zone-eu/wildduck-admin/issues/7)) ([aed2011](https://github.com/zone-eu/wildduck-admin/commit/aed2011a3cc91f54580314ab6fc3facd00cbf364))
+
 ## [0.1.3](https://github.com/zone-eu/wildduck-admin/compare/v0.1.2...v0.1.3) (2026-10-14)
 
 
