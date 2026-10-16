@@ -1,125 +1,7 @@
-import { AlertCircle, Check, Copy, LoaderCircle } from 'lucide-react';
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-  type ButtonHTMLAttributes
-} from 'react';
+import { CheckIcon, CopyIcon, WarningCircleIcon } from '@phosphor-icons/react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 
-export function StatusPill({
-  label,
-  tone
-}: {
-  label: string;
-  tone: 'success' | 'warning' | 'danger' | 'muted';
-}) {
-  const className =
-    tone === 'success'
-      ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-      : tone === 'warning'
-        ? 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
-        : tone === 'danger'
-          ? 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300'
-          : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300';
-
-  return (
-    <span
-      className={`inline-flex h-6 items-center rounded-full border px-2 text-xs font-semibold ${className}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-export function Button({
-  loading = false,
-  danger = false,
-  align = 'center',
-  disabled,
-  children,
-  className = '',
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  loading?: boolean;
-  danger?: boolean;
-  align?: 'start' | 'center';
-}) {
-  return (
-    <button
-      {...props}
-      disabled={disabled || loading}
-      aria-busy={loading || undefined}
-      data-danger={danger || undefined}
-      className={`inline-flex items-center ${align === 'start' ? 'justify-start' : 'justify-center'} gap-2 rounded-lg transition disabled:cursor-not-allowed disabled:opacity-50 ${loading ? 'button-loading' : ''} ${className}`}
-    >
-      {loading ? (
-        <LoaderCircle aria-hidden="true" className="button-spinner h-4 w-4 shrink-0 animate-spin" />
-      ) : null}
-      {children}
-    </button>
-  );
-}
-
-export function IconButton({
-  title,
-  onClick,
-  children,
-  disabled,
-  loading = false,
-  danger = /^(delete|remove)\b/i.test(title)
-}: {
-  title: string;
-  onClick: () => void;
-  children: ReactNode;
-  disabled?: boolean;
-  loading?: boolean;
-  danger?: boolean;
-}) {
-  return (
-    <Button
-      type="button"
-      title={title}
-      aria-label={title}
-      onClick={onClick}
-      disabled={disabled}
-      loading={loading}
-      danger={danger}
-      className="h-9 w-9 border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 shadow-xs hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
-    >
-      {children}
-    </Button>
-  );
-}
-
-export function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-export function ErrorNotice({ message }: { message: string }) {
-  if (!message) {
-    return null;
-  }
-
-  return (
-    <div
-      role="alert"
-      className="flex items-center gap-2 rounded-lg border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 px-3 py-2 text-sm text-rose-700 dark:text-rose-300"
-    >
-      <AlertCircle className="h-4 w-4 shrink-0" />
-      <span className="min-w-0 break-words">{message}</span>
-    </div>
-  );
-}
-
+// Keep the controlled dialog lifecycle and native focus handling in one place.
 export function ConfirmDialog({
   open,
   title,
@@ -143,64 +25,55 @@ export function ConfirmDialog({
   const titleId = useId();
   useEffect(() => {
     const element = dialog.current;
-    if (!element) {
-      return;
-    }
-    if (open && !element.open) {
-      element.showModal();
-    }
-    if (!open && element.open) {
-      element.close();
-    }
+    if (!element) return;
+    if (open && !element.open) element.showModal();
+    if (!open && element.open) element.close();
   }, [open]);
 
   return (
     <dialog
       ref={dialog}
       aria-labelledby={titleId}
+      className="modal"
       onCancel={event => {
         event.preventDefault();
-        if (!busy) {
-          onCancel();
-        }
+        if (!busy) onCancel();
       }}
-      className="m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-xl bg-transparent p-0 backdrop:bg-slate-950/60 backdrop:backdrop-blur-xs"
     >
-      <div className="w-full max-w-md rounded-lg border border-line bg-white dark:bg-slate-900 shadow-panel">
-        <div className="flex items-start gap-3 border-b border-line px-4 py-4">
-          <div className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-            <AlertCircle className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <h3 id={titleId} className="font-display text-lg font-semibold text-ink">
-              {title}
-            </h3>
-            <div className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              {message}
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col-reverse gap-2 px-4 py-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={busy}
-            className="inline-flex h-9 items-center justify-center rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+      <div className="modal-box max-w-md">
+        <h3 id={titleId} className="flex items-center gap-2 text-lg font-semibold">
+          <WarningCircleIcon className="size-5 shrink-0 text-error" aria-hidden="true" />
+          {title}
+        </h3>
+        <div className="mt-3 text-sm leading-6 text-base-content/70">{message}</div>
+        <div className="modal-action">
+          <button type="button" className="btn btn-ghost" disabled={busy} onClick={onCancel}>
             {cancelLabel}
           </button>
-          <Button
+          <button
             type="button"
-            onClick={onConfirm}
-            danger
-            loading={busy}
+            className="btn btn-error"
             disabled={busy}
-            className="inline-flex h-9 items-center justify-center rounded-lg bg-rose-600 px-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={busy || undefined}
+            onClick={onConfirm}
           >
+            {busy ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
             {busy ? 'Working…' : confirmLabel}
-          </Button>
+          </button>
         </div>
       </div>
+      <form
+        method="dialog"
+        className="modal-backdrop"
+        onSubmit={event => {
+          event.preventDefault();
+          if (!busy) onCancel();
+        }}
+      >
+        <button disabled={busy}>Close</button>
+      </form>
     </dialog>
   );
 }
@@ -229,20 +102,23 @@ export function CopyButton({ value, title }: { value: string; title: string }) {
         : title;
   return (
     <span className="inline-flex shrink-0 items-center gap-1">
-      <Button
+      <button
         type="button"
+        className="btn btn-ghost btn-square btn-sm"
         title={label}
         aria-label={label}
         onClick={copy}
-        loading={state === 'copying'}
-        className="h-8 w-8 border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+        disabled={state === 'copying'}
+        aria-busy={state === 'copying' || undefined}
       >
-        {state === 'copied' ? (
-          <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+        {state === 'copying' ? (
+          <span className="loading loading-spinner loading-xs" aria-hidden="true" />
+        ) : state === 'copied' ? (
+          <CheckIcon className="size-4 text-success" />
         ) : (
-          <Copy className="h-4 w-4" />
+          <CopyIcon className="size-4" />
         )}
-      </Button>
+      </button>
       <span role="status" className="sr-only">
         {state === 'copied' || state === 'failed' ? label : ''}
       </span>
@@ -251,23 +127,13 @@ export function CopyButton({ value, title }: { value: string; title: string }) {
 }
 
 export function formatDate(value?: string) {
-  if (!value) {
-    return '-';
-  }
-
+  if (!value) return '-';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleString();
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
 export function formatBytes(value?: number) {
-  if (!value) {
-    return '0 B';
-  }
-
+  if (!value) return '0 B';
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let amount = value;
   let unit = 0;

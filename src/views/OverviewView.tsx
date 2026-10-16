@@ -1,20 +1,19 @@
 import {
-  AlertCircle,
-  ArrowRight,
-  CheckCircle2,
-  CircleOff,
-  KeyRound,
-  LoaderCircle,
-  RefreshCw,
-  Settings,
-  Shield,
-  UserPlus,
-  Users
-} from 'lucide-react';
+  WarningCircleIcon as AlertCircle,
+  ArrowRightIcon as ArrowRight,
+  CheckCircleIcon as CheckCircle2,
+  ProhibitIcon as CircleOff,
+  KeyIcon as KeyRound,
+  SpinnerGapIcon as LoaderCircle,
+  ArrowsClockwiseIcon as RefreshCw,
+  GearIcon as Settings,
+  ShieldIcon as Shield,
+  UserPlusIcon as UserPlus,
+  UsersIcon as Users
+} from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import { getHealth, getUsers } from '../api';
 import type { HealthResponse, SessionResponse } from '../types';
-import { Button, IconButton } from './ui';
 
 type CheckError = { message: string; status?: number };
 function checkError(error: unknown): CheckError {
@@ -195,28 +194,40 @@ export function OverviewView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Overview</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-base-content/60">
             Service access, account summary, and next steps
           </p>
         </div>
-        <IconButton title="Refresh overview" loading={refreshing} onClick={refresh}>
-          <RefreshCw className="h-4 w-4" />
-        </IconButton>
+        <button
+          title="Refresh overview"
+          onClick={refresh}
+          aria-label="Refresh overview"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
+          disabled={refreshing}
+          aria-busy={Boolean(refreshing) || undefined}
+        >
+          {refreshing ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2" aria-busy={refreshing}>
-        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
-          <div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="stat min-w-0 rounded-box border border-base-300 bg-base-100 shadow-xs">
+          <div className="stat-title flex items-center gap-2">
             {refreshing ? (
-              <LoaderCircle className="h-5 w-5 animate-spin" />
+              <span aria-hidden="true" className="loading loading-spinner size-5" />
             ) : healthError ? (
-              <CircleOff className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+              <CircleOff className="h-5 w-5 text-error" />
             ) : (
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
             )}
             API status
           </div>
-          <div className="font-display text-2xl font-semibold">
+          <div className="stat-value font-display text-2xl">
             {refreshing
               ? 'Checking…'
               : healthError
@@ -225,106 +236,97 @@ export function OverviewView({
                   ? 'Online'
                   : 'Not checked'}
           </div>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="stat-desc whitespace-normal">
             {healthChecked ? `Checked ${timeAgo(healthChecked, now)}` : 'Checking the WildDuck API'}
           </p>
           {healthError && lastHealthSuccess ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-base-content/60">
               Last successful check {timeAgo(lastHealthSuccess, now)}
             </p>
           ) : null}
           {!healthError && health?.version ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Version {health.version}
-            </p>
+            <p className="mt-1 text-xs text-base-content/60">Version {health.version}</p>
           ) : null}
-          <p className="mt-3 break-all text-xs text-slate-500 dark:text-slate-400">
-            {session.api.url}
-          </p>
+          <p className="mt-3 break-all text-xs text-base-content/60">{session.api.url}</p>
         </div>
-        <div className="rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs">
-          <div className="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
+        <div className="stat min-w-0 rounded-box border border-base-300 bg-base-100 shadow-xs">
+          <div className="stat-title flex items-center gap-2">
             <Users className="h-5 w-5" />
             Total accounts
           </div>
-          <div className="font-display text-2xl font-semibold">
+          <div className="stat-value font-display text-2xl">
             {accountTotal !== null
               ? accountTotal.toLocaleString()
               : refreshing
                 ? 'Checking…'
                 : 'Unavailable'}
           </div>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="stat-desc whitespace-normal">
             {accountError && accountTotal !== null
               ? 'Last known total — refresh failed'
               : 'Across all mail accounts'}
           </p>
           {accountsChecked ? (
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-xs text-base-content/60">
               Updated {timeAgo(accountsChecked, now)}
             </p>
           ) : null}
-          <Button
-            type="button"
-            onClick={onUsers}
-            className="mt-3 text-sm font-semibold text-brand-700 dark:text-teal-300 hover:underline"
-          >
+          <button type="button" onClick={onUsers} className="btn btn-link mt-3 w-fit px-0">
             View accounts
             <ArrowRight className="h-4 w-4" />
-          </Button>
+          </button>
         </div>
       </div>
 
       <section
-        className="rounded-xl border border-line bg-white dark:bg-slate-900 shadow-xs"
+        className="card border border-base-300 bg-base-100 shadow-xs"
         aria-labelledby="attention-heading"
       >
-        <div className="border-b border-line px-5 py-4">
+        <div className="border-b border-base-300 px-5 py-4">
           <h3 id="attention-heading" className="font-semibold">
             Needs attention
           </h3>
         </div>
         {issues.length ? (
-          <ul className="divide-y divide-line">
+          <ul className="divide-y divide-base-300">
             {issues.map(issue => (
               <li key={issue.id} className="flex flex-wrap items-start gap-3 p-5">
                 {issue.id === '2fa' ? (
-                  <Shield className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" />
+                  <Shield className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
                 ) : (
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-300" />
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-error" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">{issue.title}</p>
-                  <p className="mt-1 break-words text-sm text-slate-500 dark:text-slate-400">
-                    {issue.detail}
-                  </p>
+                  <p className="mt-1 break-words text-sm text-base-content/60">{issue.detail}</p>
                 </div>
                 {issue.onAction ? (
-                  <Button
+                  <button
                     type="button"
-                    loading={issue.id !== '2fa' && refreshing}
                     onClick={issue.onAction}
-                    className="min-h-9 border border-line px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="btn btn-outline"
+                    disabled={issue.id !== '2fa' && refreshing}
+                    aria-busy={Boolean(issue.id !== '2fa' && refreshing) || undefined}
                   >
+                    {issue.id !== '2fa' && refreshing ? (
+                      <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                    ) : null}
                     {issue.action}
-                  </Button>
+                  </button>
                 ) : null}
               </li>
             ))}
           </ul>
         ) : (
-          <div
-            role="status"
-            className="flex items-center gap-2 p-5 text-sm text-slate-500 dark:text-slate-400"
-          >
+          <div role="status" className="flex items-center gap-2 p-5 text-sm text-base-content/60">
             {refreshing ? (
               <>
-                <LoaderCircle className="h-4 w-4 animate-spin" />
+                <span aria-hidden="true" className="loading loading-spinner size-4" />
                 Checking service and account access…
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+                <CheckCircle2 className="h-4 w-4 text-success" />
                 No issues detected by the latest checks.
               </>
             )}
@@ -338,21 +340,18 @@ export function OverviewView({
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {actions.map(action => (
-            <Button
+            <button
               key={action.title}
               type="button"
-              align="start"
               onClick={action.onClick}
-              className="gap-3 border border-line bg-white dark:bg-slate-900 p-4 text-left shadow-xs hover:border-brand-500 hover:bg-brand-50 dark:hover:bg-teal-950"
+              className="btn btn-outline text-left h-auto py-4 whitespace-normal justify-start"
             >
-              <action.icon className="h-5 w-5 shrink-0 text-brand-600 dark:text-teal-300" />
+              <action.icon className="h-5 w-5 shrink-0 text-primary" />
               <span className="min-w-0">
                 <span className="block text-sm font-semibold">{action.title}</span>
-                <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
-                  {action.detail}
-                </span>
+                <span className="mt-1 block text-xs text-base-content/60">{action.detail}</span>
               </span>
-            </Button>
+            </button>
           ))}
         </div>
       </section>

@@ -1,14 +1,14 @@
 import {
-  ChevronLeft,
-  ChevronRight,
-  KeyRound,
-  Plus,
-  RefreshCw,
-  Save,
-  Search,
-  Server,
-  Trash2
-} from 'lucide-react';
+  CaretLeftIcon as ChevronLeft,
+  CaretRightIcon as ChevronRight,
+  KeyIcon as KeyRound,
+  PlusIcon as Plus,
+  ArrowsClockwiseIcon as RefreshCw,
+  FloppyDiskIcon as Save,
+  MagnifyingGlassIcon as Search,
+  HardDrivesIcon as Server,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   deleteTlsCertificate,
@@ -17,15 +17,7 @@ import {
   saveTlsCertificate
 } from '../api';
 import type { TlsCertificate, TlsCertificateInput } from '../types';
-import {
-  Button,
-  ConfirmDialog,
-  ErrorNotice,
-  Field,
-  IconButton,
-  StatusPill,
-  formatDate
-} from './ui';
+import { ConfirmDialog, formatDate } from './ui';
 
 function certTone(cert: TlsCertificate) {
   if (!cert.expires) {
@@ -101,68 +93,78 @@ function CertCreateForm({ onSave }: { onSave: (input: TlsCertificateInput) => Pr
     <form
       onSubmit={submit}
       noValidate
-      className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs"
+      className="card border border-base-300 bg-base-100 p-4 shadow-xs"
     >
       <div className="mb-3 flex items-center gap-2">
-        <KeyRound className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+        <KeyRound className="h-4 w-4 text-primary" />
         <h3 className="font-semibold">Create or update cert</h3>
       </div>
       <div className="space-y-3">
-        <Field label="Server name">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Server name</span>
           <input
             value={servername}
             onChange={event => setServername(event.target.value)}
             placeholder="imap.example.com"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <Field label="Description">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Description</span>
           <input
             value={description}
             onChange={event => setDescription(event.target.value)}
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+        </label>
+        <label className="inline-flex items-center gap-2 text-sm text-base-content/80">
           <input
             type="checkbox"
             checked={acme}
             onChange={event => setAcme(event.target.checked)}
-            className="checkbox"
+            className="checkbox checkbox-primary checkbox-sm"
           />
           Managed by ACME
         </label>
-        <Field label="Private key">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Private key</span>
           <textarea
             value={privateKey}
             onChange={event => setPrivateKey(event.target.value)}
-            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="textarea w-full min-h-24 font-mono text-xs"
           />
-        </Field>
-        <Field label="Certificate">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Certificate</span>
           <textarea
             value={cert}
             onChange={event => setCert(event.target.value)}
-            className="min-h-24 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="textarea w-full min-h-24 font-mono text-xs"
           />
-        </Field>
-        <Field label="CA chain">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">CA chain</span>
           <textarea
             value={ca}
             onChange={event => setCa(event.target.value)}
-            className="min-h-20 w-full rounded-lg border border-line bg-white dark:bg-slate-900 px-3 py-2 font-mono text-xs outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+            className="textarea w-full min-h-20 font-mono text-xs"
           />
-        </Field>
-        <ErrorNotice message={error} />
-        <Button
-          loading={busy}
+        </label>
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
+        <button
           type="submit"
+          className="btn btn-primary w-full"
           disabled={busy}
-          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-busy={Boolean(busy) || undefined}
         >
+          {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
           <Save className="h-4 w-4" />
           Save cert
-        </Button>
+        </button>
       </div>
     </form>
   );
@@ -198,78 +200,85 @@ function CertDetailPanel({
 
   if (!selected) {
     return (
-      <div className="rounded-lg border border-dashed border-line bg-white dark:bg-slate-900 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
-        <KeyRound className="mx-auto mb-3 h-8 w-8 text-slate-300 dark:text-slate-600" />
+      <div className="card border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/60">
+        <KeyRound className="mx-auto mb-3 h-8 w-8 text-base-content/30" />
         No certificate selected
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-      <div className="flex items-start justify-between gap-3 border-b border-line px-4 py-3">
+    <div className="card border border-base-300 bg-base-100 shadow-xs">
+      <div className="flex items-start justify-between gap-3 border-b border-base-300 px-4 py-3">
         <div className="min-w-0">
           <h3 className="break-all font-display text-lg font-semibold">{selected.servername}</h3>
-          <p className="break-all text-sm text-slate-500 dark:text-slate-400">
+          <p className="break-all text-sm text-base-content/60">
             {selected.description || selected.id}
           </p>
         </div>
-        <IconButton
-          loading={busy}
+        <button
           title="Delete certificate"
           onClick={() => setConfirmOpen(true)}
+          aria-label="Delete certificate"
+          type="button"
+          className="btn btn-square btn-sm btn-error btn-soft"
           disabled={busy}
+          aria-busy={Boolean(busy) || undefined}
         >
-          <Trash2 className="h-4 w-4" />
-        </IconButton>
+          {busy ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       <div className="space-y-4 p-4 text-sm">
         <div className="flex flex-wrap gap-2">
-          <StatusPill label={certStatus(selected)} tone={certTone(selected)} />
+          <span
+            className={`badge badge-sm badge-soft ${{ success: 'badge-success', warning: 'badge-warning', danger: 'badge-error', muted: 'badge-ghost' }[certTone(selected)]}`}
+          >
+            {certStatus(selected)}
+          </span>
           {selected.hasCert === false ? (
-            <StatusPill label="No cert material" tone="warning" />
+            <span className="badge badge-sm badge-soft badge-warning">No cert material</span>
           ) : null}
-          {selected.autogenerated ? <StatusPill label="Autogenerated" tone="muted" /> : null}
+          {selected.autogenerated ? (
+            <span className="badge badge-sm badge-soft badge-ghost">Autogenerated</span>
+          ) : null}
         </div>
 
         <dl className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
               ID
             </dt>
-            <dd className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-200">
-              {selected.id}
-            </dd>
+            <dd className="mt-1 break-all font-mono text-xs text-base-content/80">{selected.id}</dd>
           </div>
           <div className="col-span-2">
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
               Fingerprint
             </dt>
-            <dd className="mt-1 break-all font-mono text-xs text-slate-700 dark:text-slate-200">
+            <dd className="mt-1 break-all font-mono text-xs text-base-content/80">
               {selected.fingerprint || '-'}
             </dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
               Created
             </dt>
-            <dd className="mt-1 text-slate-700 dark:text-slate-200">
-              {formatDate(selected.created)}
-            </dd>
+            <dd className="mt-1 text-base-content/80">{formatDate(selected.created)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-base-content/60">
               Expires
             </dt>
-            <dd className="mt-1 text-slate-700 dark:text-slate-200">
-              {formatDate(selected.expires)}
-            </dd>
+            <dd className="mt-1 text-base-content/80">{formatDate(selected.expires)}</dd>
           </div>
         </dl>
 
         <div>
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/60">
             Alt names
           </div>
           <div className="flex flex-wrap gap-2">
@@ -277,18 +286,22 @@ function CertDetailPanel({
               selected.altNames.map(name => (
                 <span
                   key={name}
-                  className="break-all rounded-lg bg-slate-50 dark:bg-slate-800 px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200"
+                  className="break-all rounded-lg bg-base-200 px-2 py-1 text-xs font-medium text-base-content/80"
                 >
                   {name}
                 </span>
               ))
             ) : (
-              <span className="text-slate-500 dark:text-slate-400">-</span>
+              <span className="text-base-content/60">-</span>
             )}
           </div>
         </div>
 
-        <ErrorNotice message={error} />
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
       </div>
       <ConfirmDialog
         open={confirmOpen}
@@ -296,7 +309,7 @@ function CertDetailPanel({
         message={
           <>
             Delete certificate for{' '}
-            <strong className="break-all text-ink">{selected.servername}</strong>?
+            <strong className="break-all text-base-content">{selected.servername}</strong>?
           </>
         }
         confirmLabel="Delete cert"
@@ -404,47 +417,69 @@ export function CertsView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Certs</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">{total} certificates</p>
+          <p className="text-sm text-base-content/60">{total} certificates</p>
         </div>
         <div className="flex items-center gap-2">
-          {expiringSoon ? <StatusPill label={`${expiringSoon} expiring`} tone="warning" /> : null}
-          <IconButton loading={loading} title="Refresh" onClick={() => load()} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </IconButton>
+          {expiringSoon ? (
+            <span className="badge badge-sm badge-soft badge-warning">{`${expiringSoon} expiring`}</span>
+          ) : null}
+          <button
+            title="Refresh"
+            onClick={() => load()}
+            aria-label="Refresh"
+            type="button"
+            className="btn btn-square btn-sm btn-ghost"
+            disabled={loading}
+            aria-busy={Boolean(loading) || undefined}
+          >
+            {loading ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
 
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_430px]">
-        <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-          <div className="border-b border-line p-4">
+        <div className="card border border-base-300 bg-base-100 shadow-xs">
+          <div className="border-b border-base-300 p-4">
             <form onSubmit={submitSearch} className="space-y-3">
               <div className="flex gap-2">
-                <div className="relative min-w-0 flex-1">
-                  <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <div className="relative flex min-w-0 flex-1 items-center">
+                  <Search className="pointer-events-none absolute z-10 left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-base-content/50" />
                   <input
                     value={query}
                     onChange={event => setQuery(event.target.value)}
                     placeholder="Server name"
-                    className="h-10 w-full rounded-lg border border-line pl-9 pr-3 text-sm outline-hidden transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-teal-900"
+                    className="input w-full pl-9 pr-3"
                   />
                 </div>
-                <Button
-                  loading={loading}
+                <button
                   type="submit"
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300"
+                  className="btn btn-outline"
+                  disabled={loading}
+                  aria-busy={Boolean(loading) || undefined}
                 >
+                  {loading ? (
+                    <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                  ) : null}
                   <Search className="h-4 w-4" />
                   Search
-                </Button>
+                </button>
               </div>
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+              <label className="inline-flex items-center gap-2 text-sm text-base-content/80">
                 <input
                   type="checkbox"
                   checked={altNames}
                   onChange={event => setAltNames(event.target.checked)}
-                  className="checkbox"
+                  className="checkbox checkbox-primary checkbox-sm"
                 />
                 Match SAN names
               </label>
@@ -452,48 +487,45 @@ export function CertsView() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-line text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <table className="table table-sm w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3">Server name</th>
-                  <th className="px-4 py-3">Mode</th>
-                  <th className="px-4 py-3">Expires</th>
-                  <th className="px-4 py-3">Alt names</th>
+                  <th>Server name</th>
+                  <th>Mode</th>
+                  <th>Expires</th>
+                  <th>Alt names</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody>
                 {certs.map(cert => {
                   const active = selected?.id === cert.id;
                   return (
                     <tr
                       key={cert.id}
                       onClick={() => selectCert(cert)}
-                      className={`cursor-pointer transition ${active ? 'bg-brand-50 dark:bg-teal-950' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                      className={`cursor-pointer transition ${active ? 'bg-primary/10' : 'hover:bg-base-200'}`}
                     >
-                      <td className="px-4 py-3">
+                      <td>
                         <div className="break-all font-medium">{cert.servername}</div>
-                        <div className="break-all text-xs text-slate-500 dark:text-slate-400">
+                        <div className="break-all text-xs text-base-content/60">
                           {cert.description || cert.id}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <StatusPill label={certStatus(cert)} tone={certTone(cert)} />
+                      <td>
+                        <span
+                          className={`badge badge-sm badge-soft ${{ success: 'badge-success', warning: 'badge-warning', danger: 'badge-error', muted: 'badge-ghost' }[certTone(cert)]}`}
+                        >
+                          {certStatus(cert)}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {formatDate(cert.expires)}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
-                        {cert.altNames?.length || 0}
-                      </td>
+                      <td className="text-base-content/70">{formatDate(cert.expires)}</td>
+                      <td className="text-base-content/70">{cert.altNames?.length || 0}</td>
                     </tr>
                   );
                 })}
                 {!certs.length ? (
                   <tr>
-                    <td
-                      className="px-4 py-10 text-center text-slate-500 dark:text-slate-400"
-                      colSpan={4}
-                    >
+                    <td className="text-center text-base-content/60" colSpan={4}>
                       No certificates found
                     </td>
                   </tr>
@@ -502,28 +534,42 @@ export function CertsView() {
             </table>
           </div>
 
-          <div className="flex items-center justify-between border-t border-line px-4 py-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between border-t border-base-300 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-base-content/60">
               <Server className="h-4 w-4" />
               {certs.length} shown
             </div>
             <div className="flex gap-2">
-              <IconButton
-                loading={loading}
+              <button
                 title="Previous page"
                 onClick={() => previousCursor && load({ previous: previousCursor })}
-                disabled={!previousCursor}
+                aria-label="Previous page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!previousCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronLeft className="h-4 w-4" />
-              </IconButton>
-              <IconButton
-                loading={loading}
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </button>
+              <button
                 title="Next page"
                 onClick={() => nextCursor && load({ next: nextCursor })}
-                disabled={!nextCursor}
+                aria-label="Next page"
+                type="button"
+                className="btn btn-square btn-sm btn-ghost"
+                disabled={!nextCursor || loading}
+                aria-busy={Boolean(loading) || undefined}
               >
-                <ChevronRight className="h-4 w-4" />
-              </IconButton>
+                {loading ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
         </div>

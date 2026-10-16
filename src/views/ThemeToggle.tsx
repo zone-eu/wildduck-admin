@@ -1,12 +1,11 @@
-import { Moon, Sun } from 'lucide-react';
+import { MoonIcon as Moon, SunIcon as Sun } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
-import { IconButton } from './ui';
 
 export function ThemeToggle() {
-  const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'));
+  const [dark, setDark] = useState(() => document.documentElement.dataset.theme === 'dark');
 
   useEffect(() => {
-    const sync = () => setDark(document.documentElement.classList.contains('dark'));
+    const sync = () => setDark(document.documentElement.dataset.theme === 'dark');
     const media = matchMedia('(prefers-color-scheme: dark)');
     const systemChanged = () => {
       try {
@@ -16,17 +15,19 @@ export function ThemeToggle() {
       } catch {
         return;
       }
-      document.documentElement.classList.toggle('dark', media.matches);
+      document.documentElement.dataset.theme = media.matches ? 'dark' : 'light';
       sync();
     };
     const storageChanged = (event: StorageEvent) => {
       if (event.key !== 'admin-theme') {
         return;
       }
-      document.documentElement.classList.toggle(
-        'dark',
-        event.newValue ? event.newValue === 'dark' : media.matches
-      );
+      document.documentElement.dataset.theme =
+        event.newValue === 'dark' || event.newValue === 'light'
+          ? event.newValue
+          : media.matches
+            ? 'dark'
+            : 'light';
       sync();
     };
     window.addEventListener('admin-theme-changed', sync);
@@ -40,8 +41,8 @@ export function ThemeToggle() {
   }, []);
 
   function toggle() {
-    const next = !document.documentElement.classList.contains('dark');
-    document.documentElement.classList.toggle('dark', next);
+    const next = document.documentElement.dataset.theme !== 'dark';
+    document.documentElement.dataset.theme = next ? 'dark' : 'light';
     try {
       localStorage.setItem('admin-theme', next ? 'dark' : 'light');
     } catch {
@@ -51,8 +52,14 @@ export function ThemeToggle() {
   }
 
   return (
-    <IconButton title={dark ? 'Switch to light mode' : 'Switch to dark mode'} onClick={toggle}>
+    <button
+      title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+      onClick={toggle}
+      aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+      type="button"
+      className="btn btn-square btn-sm btn-ghost"
+    >
       {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </IconButton>
+    </button>
   );
 }

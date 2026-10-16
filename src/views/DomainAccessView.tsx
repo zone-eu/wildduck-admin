@@ -1,8 +1,14 @@
-import { CircleOff, Plus, RefreshCw, Shield, Trash2 } from 'lucide-react';
+import {
+  ProhibitIcon as CircleOff,
+  PlusIcon as Plus,
+  ArrowsClockwiseIcon as RefreshCw,
+  ShieldIcon as Shield,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import { FormEvent, useEffect, useState } from 'react';
 import { createDomainAccess, deleteDomainAccess, getDomainAccess } from '../api';
 import type { DomainAccessAction, DomainAccessItem } from '../types';
-import { Button, ConfirmDialog, ErrorNotice, Field, IconButton, StatusPill } from './ui';
+import { ConfirmDialog } from './ui';
 
 function actionLabel(action: DomainAccessAction) {
   return action === 'allow' ? 'Allowlist' : 'Blocklist';
@@ -48,52 +54,64 @@ function DomainAccessList({
   }
 
   return (
-    <div className="rounded-lg border border-line bg-white dark:bg-slate-900 shadow-xs">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+    <div className="card border border-base-300 bg-base-100 shadow-xs">
+      <div className="flex items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
         <div className="flex min-w-0 items-center gap-2">
-          <Icon className="h-4 w-4 text-brand-600 dark:text-teal-300" />
+          <Icon className="h-4 w-4 text-primary" />
           <h3 className="font-semibold">{actionLabel(action)}</h3>
         </div>
-        <StatusPill label={`${items.length} domains`} tone={items.length ? 'success' : 'muted'} />
+        <span
+          className={`badge badge-sm badge-soft ${items.length ? 'badge-success' : 'badge-ghost'}`}
+        >{`${items.length} domains`}</span>
       </div>
 
-      <form onSubmit={submit} noValidate className="space-y-3 border-b border-line p-4">
-        <Field label="Domain">
+      <form onSubmit={submit} noValidate className="space-y-3 border-b border-base-300 p-4">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Domain</span>
           <input
             value={domain}
             onChange={event => setDomain(event.target.value)}
             placeholder="example.com"
-            className="input"
+            className="input w-full"
           />
-        </Field>
-        <ErrorNotice message={error} />
-        <Button
-          loading={busy}
+        </label>
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
+        <button
           type="submit"
+          className="btn btn-primary w-full"
           disabled={busy}
-          className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          aria-busy={Boolean(busy) || undefined}
         >
+          {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
           <Plus className="h-4 w-4" />
           Add domain
-        </Button>
+        </button>
       </form>
 
-      <div className="divide-y divide-line">
+      <div className="divide-y divide-base-300">
         {items.map(item => (
           <div key={item.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
             <div className="min-w-0">
               <div className="break-all font-medium">{item.domain}</div>
-              <div className="font-mono text-xs text-slate-500 dark:text-slate-400">{item.id}</div>
+              <div className="font-mono text-xs text-base-content/60">{item.id}</div>
             </div>
-            <IconButton title={`Remove ${item.domain}`} onClick={() => onDelete(item)}>
+            <button
+              title={`Remove ${item.domain}`}
+              onClick={() => onDelete(item)}
+              aria-label={`Remove ${item.domain}`}
+              type="button"
+              className="btn btn-square btn-sm btn-error btn-soft"
+            >
               <Trash2 className="h-4 w-4" />
-            </IconButton>
+            </button>
           </div>
         ))}
         {!items.length ? (
-          <div className="px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
-            No domains
-          </div>
+          <div className="px-4 py-8 text-center text-sm text-base-content/60">No domains</div>
         ) : null}
       </div>
     </div>
@@ -171,38 +189,57 @@ export function DomainAccessView() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-2xl font-semibold">Domain Access</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Tag {loadedTag}</p>
+          <p className="text-sm text-base-content/60">Tag {loadedTag}</p>
         </div>
-        <IconButton
-          loading={loading}
+        <button
           title="Refresh"
           onClick={() => load(loadedTag)}
+          aria-label="Refresh"
+          type="button"
+          className="btn btn-square btn-sm btn-ghost"
           disabled={loading}
+          aria-busy={Boolean(loading) || undefined}
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </IconButton>
+          {loading ? (
+            <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <div className="rounded-lg border border-line bg-white dark:bg-slate-900 p-4 shadow-xs">
+      <div className="card border border-base-300 bg-base-100 p-4 shadow-xs">
         <form onSubmit={submitTag} noValidate className="flex flex-col gap-2 sm:flex-row">
           <div className="min-w-0 flex-1">
-            <Field label="Tag">
-              <input value={tag} onChange={event => setTag(event.target.value)} className="input" />
-            </Field>
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">Tag</span>
+              <input
+                value={tag}
+                onChange={event => setTag(event.target.value)}
+                className="input w-full"
+              />
+            </label>
           </div>
-          <Button
-            loading={loading}
+          <button
             type="submit"
+            className="btn btn-outline mt-0"
             disabled={loading}
-            className="mt-0 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line bg-white dark:bg-slate-900 px-3 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:border-brand-500 hover:text-brand-700 dark:hover:text-teal-300 disabled:cursor-not-allowed disabled:opacity-60 sm:mt-5"
+            aria-busy={Boolean(loading) || undefined}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : null}
+            <RefreshCw className="h-4 w-4" />
             Load
-          </Button>
+          </button>
         </form>
       </div>
 
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <DomainAccessList
@@ -225,8 +262,8 @@ export function DomainAccessView() {
         message={
           pendingDelete ? (
             <>
-              Remove <strong className="break-all text-ink">{pendingDelete.domain}</strong> from{' '}
-              {actionLabel(pendingDelete.action).toLowerCase()}?
+              Remove <strong className="break-all text-base-content">{pendingDelete.domain}</strong>{' '}
+              from {actionLabel(pendingDelete.action).toLowerCase()}?
             </>
           ) : null
         }

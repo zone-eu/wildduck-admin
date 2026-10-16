@@ -1,5 +1,10 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
+import {
+  PlusIcon as Plus,
+  ArrowsClockwiseIcon as RefreshCw,
+  FloppyDiskIcon as Save,
+  TrashIcon as Trash2
+} from '@phosphor-icons/react';
 import {
   deleteFilter,
   getAutoreply,
@@ -11,7 +16,7 @@ import {
   saveFilter
 } from '../api';
 import type { AutoreplyInput, FilterInput, FilterItem, MailboxItem, UserListItem } from '../types';
-import { Button, ConfirmDialog, ErrorNotice, Field, IconButton, StatusPill } from './ui';
+import { ConfirmDialog } from './ui';
 
 const emptyReply: AutoreplyInput = {
   status: false,
@@ -23,9 +28,7 @@ const emptyReply: AutoreplyInput = {
   end: false
 };
 const emptyFilter = (): FilterInput => ({ name: '', disabled: false, query: {}, action: {} });
-const button =
-  'inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50';
-const panel = 'rounded-xl border border-line bg-white dark:bg-slate-900 p-5 shadow-xs';
+const panel = 'card border border-base-300 bg-base-100 p-5 shadow-xs';
 const errorMessage = (err: unknown) => (err instanceof Error ? err.message : 'Request failed');
 
 export function MailRulesView() {
@@ -68,22 +71,24 @@ export function MailRulesView() {
     <section className="space-y-5">
       <div>
         <h2 className="font-display text-2xl font-semibold">Mail rules</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-base-content/60">
           Manage incoming mail filters and vacation replies for an account.
         </p>
       </div>
       <div className={`${panel} grid gap-4 sm:grid-cols-2`}>
-        <Field label="Search accounts">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Search accounts</span>
           <input
-            className="input"
+            className="input w-full"
             placeholder="Username or email address"
             value={query}
             onChange={event => setQuery(event.target.value)}
           />
-        </Field>
-        <Field label="Account">
+        </label>
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Account</span>
           <select
-            className="input"
+            className="select w-full"
             value={user?.id || ''}
             onChange={event => setUser(users.find(item => item.id === event.target.value) || null)}
           >
@@ -99,24 +104,29 @@ export function MailRulesView() {
               </option>
             ))}
           </select>
-        </Field>
-        <ErrorNotice message={error} />
+        </label>
+        {error ? (
+          <div role="alert" className="alert alert-error alert-soft">
+            <span className="min-w-0 break-words">{error}</span>
+          </div>
+        ) : null}
       </div>
-      <div className="flex gap-2" aria-label="Mail rule type">
+      <div role="tablist" className="tabs tabs-box w-fit" aria-label="Mail rule type">
         {(['filters', 'autoreply'] as const).map(item => (
-          <Button
+          <button
             key={item}
             type="button"
-            aria-pressed={tab === item}
+            role="tab"
+            aria-selected={tab === item}
             onClick={() => setTab(item)}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold ${tab === item ? 'bg-brand-600 text-white' : 'border border-line bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300'}`}
+            className={`tab ${tab === item ? 'tab-active' : ''}`}
           >
             {item === 'filters' ? 'Incoming mail filters' : 'Vacation reply'}
-          </Button>
+          </button>
         ))}
       </div>
       {!user ? (
-        <div className={`${panel} py-12 text-center text-slate-500 dark:text-slate-400`}>
+        <div className={`${panel} py-12 text-center text-base-content/60`}>
           Select an account to manage its mail rules.
         </div>
       ) : tab === 'filters' ? (
@@ -193,17 +203,22 @@ function Autoreply({ userId }: { userId: string }) {
     <form className={`${panel} space-y-4`} onSubmit={submit}>
       <div className="flex items-center justify-between gap-3">
         <h3 className="font-semibold">Vacation reply</h3>
-        <StatusPill
-          tone={reply.status ? 'success' : 'muted'}
-          label={reply.status ? 'Enabled' : 'Disabled'}
-        />
+        <span
+          className={`badge badge-sm badge-soft ${reply.status ? 'badge-success' : 'badge-ghost'}`}
+        >
+          {reply.status ? 'Enabled' : 'Disabled'}
+        </span>
       </div>
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
       <fieldset disabled={!ready || busy} className="space-y-4 disabled:opacity-60">
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            className="checkbox"
+            className="checkbox checkbox-primary checkbox-sm"
             checked={reply.status}
             onChange={event => update('status', event.target.checked)}
           />
@@ -211,45 +226,47 @@ function Autoreply({ userId }: { userId: string }) {
         </label>
         <div className="grid gap-4 sm:grid-cols-2">
           {(['name', 'subject'] as const).map(key => (
-            <Field key={key} label={key}>
+            <label key={key} className="fieldset min-w-0">
+              <span className="fieldset-legend">{key}</span>
               <input
-                className="input"
+                className="input w-full"
                 maxLength={key === 'name' ? 128 : 2048}
                 value={reply[key]}
                 onChange={event => update(key, event.target.value)}
               />
-            </Field>
+            </label>
           ))}
         </div>
-        <Field label="Reply message">
+        <label className="fieldset min-w-0">
+          <span className="fieldset-legend">Reply message</span>
           <textarea
-            className="input h-auto min-h-36 py-3"
+            className="textarea w-full h-auto min-h-36"
             value={reply.text}
             maxLength={128 * 1024}
             onChange={event => update('text', event.target.value)}
           />
-        </Field>
-        <details>
-          <summary className="cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-300">
-            HTML alternative
-          </summary>
-          <div className="mt-3">
-            <Field label="HTML message">
+        </label>
+        <details className="collapse collapse-arrow border border-base-300">
+          <summary className="collapse-title text-sm font-medium">HTML alternative</summary>
+          <div className="collapse-content">
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">HTML message</span>
               <textarea
-                className="input h-auto min-h-28 py-3 font-mono"
+                className="textarea w-full h-auto min-h-28 font-mono"
                 value={reply.html}
                 maxLength={128 * 1024}
                 onChange={event => update('html', event.target.value)}
               />
-            </Field>
+            </label>
           </div>
         </details>
         <div className="grid gap-4 sm:grid-cols-2">
           {(['start', 'end'] as const).map(key => (
-            <Field key={key} label={`${key} (optional, local time)`}>
+            <label key={key} className="fieldset min-w-0">
+              <span className="fieldset-legend">{`${key} (optional, local time)`}</span>
               <input
                 type="datetime-local"
-                className="input"
+                className="input w-full"
                 value={localDate(reply[key])}
                 onChange={event =>
                   update(
@@ -258,21 +275,27 @@ function Autoreply({ userId }: { userId: string }) {
                   )
                 }
               />
-            </Field>
+            </label>
           ))}
         </div>
-        <Button loading={busy} className={button} type="submit">
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={busy}
+          aria-busy={Boolean(busy) || undefined}
+        >
+          {busy ? <span aria-hidden="true" className="loading loading-spinner loading-xs" /> : null}
           <Save className="h-4 w-4" />
           {busy ? 'Saving…' : 'Save vacation reply'}
-        </Button>
+        </button>
       </fieldset>
       {!ready && !error ? (
-        <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
+        <p role="status" className="text-sm text-base-content/60">
           Loading vacation reply…
         </p>
       ) : null}
       {saved ? (
-        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+        <p role="status" className="text-sm text-success">
           Vacation reply saved.
         </p>
       ) : null}
@@ -389,27 +412,38 @@ function Filters({ userId }: { userId: string }) {
   }
   return (
     <div className="space-y-4">
-      <ErrorNotice message={error} />
+      {error ? (
+        <div role="alert" className="alert alert-error alert-soft">
+          <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
       {notice ? (
-        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+        <p role="status" className="text-sm text-success">
           {notice}
         </p>
       ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-base-content/60">
           {limits ? `${limits.used} / ${limits.allowed} filters used` : `${filters.length} filters`}
         </p>
         <div className="flex gap-2">
-          <IconButton
-            loading={loading}
+          <button
             title="Refresh filters"
             onClick={load}
-            disabled={loading || busy}
+            aria-label="Refresh filters"
+            type="button"
+            className="btn btn-square btn-sm btn-ghost"
+            disabled={loading || busy || loading}
+            aria-busy={Boolean(loading) || undefined}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </IconButton>
-          <Button
-            className={button}
+            {loading ? (
+              <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+          </button>
+          <button
+            className="btn btn-primary"
             type="button"
             disabled={busy || loading}
             onClick={() => {
@@ -421,53 +455,64 @@ function Filters({ userId }: { userId: string }) {
           >
             <Plus className="h-4 w-4" />
             New filter
-          </Button>
+          </button>
         </div>
       </div>
       <div className={`${panel} space-y-3`} aria-busy={loading}>
         {loading ? (
-          <p role="status" className="text-sm text-slate-500 dark:text-slate-400">
+          <p role="status" className="text-sm text-base-content/60">
             Loading filters…
           </p>
         ) : !filters.length ? (
-          <p className="py-6 text-center text-slate-500 dark:text-slate-400">
+          <p className="py-6 text-center text-base-content/60">
             No incoming mail filters. Create a rule to sort or forward matching messages.
           </p>
         ) : (
           filters.map(item => (
             <div
               key={item.id}
-              className={`flex items-start justify-between gap-3 rounded-lg border p-4 ${editing === item.id ? 'border-brand-500 bg-brand-50 dark:bg-teal-950' : 'border-line'}`}
+              className={`flex items-start justify-between gap-3 rounded-lg border p-4 ${editing === item.id ? 'border-primary bg-primary/10' : 'border-base-300'}`}
             >
-              <Button
-                loading={selectingId === item.id}
+              <button
                 type="button"
-                disabled={busy}
                 onClick={() => edit(item)}
-                className="!block min-w-0 flex-1 text-left"
+                className="btn btn-ghost !block min-w-0 flex-1 text-left"
+                disabled={busy || selectingId === item.id}
+                aria-busy={Boolean(selectingId === item.id) || undefined}
               >
+                {selectingId === item.id ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold">{item.name || 'Unnamed filter'}</span>
-                  <StatusPill
-                    tone={item.disabled ? 'muted' : 'success'}
-                    label={item.disabled ? 'Disabled' : 'Enabled'}
-                  />
+                  <span
+                    className={`badge badge-sm badge-soft ${item.disabled ? 'badge-ghost' : 'badge-success'}`}
+                  >
+                    {item.disabled ? 'Disabled' : 'Enabled'}
+                  </span>
                 </div>
-                <p className="mt-2 break-words text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-2 break-words text-sm text-base-content/60">
                   {item.query.map(parts => parts.join(': ')).join(' · ') || 'All incoming messages'}
                 </p>
-                <p className="mt-1 break-words text-sm text-slate-700 dark:text-slate-200">
+                <p className="mt-1 break-words text-sm text-base-content/80">
                   {item.action.map(parts => parts.join(': ')).join(' · ') || 'No actions'}
                 </p>
-              </Button>
-              <IconButton
-                loading={busy && deleting?.id === item.id}
+              </button>
+              <button
                 title={`Delete ${item.name || 'filter'}`}
                 onClick={() => setDeleting(item)}
-                disabled={busy}
+                aria-label={`Delete ${item.name || 'filter'}`}
+                type="button"
+                className="btn btn-square btn-sm btn-error btn-soft"
+                disabled={busy || (busy && deleting?.id === item.id)}
+                aria-busy={Boolean(busy && deleting?.id === item.id) || undefined}
               >
-                <Trash2 className="h-4 w-4 text-rose-600 dark:text-rose-300" />
-              </IconButton>
+                {busy && deleting?.id === item.id ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : (
+                  <Trash2 className="h-4 w-4 text-error" />
+                )}
+              </button>
             </div>
           ))
         )}
@@ -476,45 +521,50 @@ function Filters({ userId }: { userId: string }) {
         <form onSubmit={save} className={`${panel} space-y-4`}>
           <h3 className="font-semibold">{editing ? 'Edit filter' : 'Create filter'}</h3>
           <fieldset disabled={busy} className="space-y-4">
-            <Field label="Rule name">
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">Rule name</span>
               <input
-                className="input"
+                className="input w-full"
                 required
                 maxLength={255}
                 value={draft.name || ''}
                 onChange={event => setDraft({ ...draft, name: event.target.value })}
               />
-            </Field>
+            </label>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                className="checkbox"
+                className="checkbox checkbox-primary checkbox-sm"
                 checked={!draft.disabled}
                 onChange={event => setDraft({ ...draft, disabled: !event.target.checked })}
               />
               Enabled
             </label>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-base-content/60">
               Messages must match all conditions. Leaving every condition empty matches all incoming
               messages.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               {(['from', 'to', 'subject', 'listId', 'text'] as const).map(key => (
-                <Field key={key} label={key === 'listId' ? 'Mailing list ID' : key}>
+                <label key={key} className="fieldset min-w-0">
+                  <span className="fieldset-legend">
+                    {key === 'listId' ? 'Mailing list ID' : key}
+                  </span>
                   <input
-                    className="input"
+                    className="input w-full"
                     maxLength={255}
                     value={draft.query[key] || ''}
                     onChange={event =>
                       setDraft({ ...draft, query: { ...draft.query, [key]: event.target.value } })
                     }
                   />
-                </Field>
+                </label>
               ))}
-              <Field label="Size in bytes (+ larger, − smaller)">
+              <label className="fieldset min-w-0">
+                <span className="fieldset-legend">Size in bytes (+ larger, − smaller)</span>
                 <input
                   type="number"
-                  className="input"
+                  className="input w-full"
                   value={draft.query.size || ''}
                   onChange={event =>
                     setDraft({
@@ -523,23 +573,23 @@ function Filters({ userId }: { userId: string }) {
                     })
                   }
                 />
-              </Field>
+              </label>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {(['seen', 'flag', 'spam', 'delete'] as const).map(key => (
-                <Field
-                  key={key}
-                  label={
+                <label key={key} className="fieldset min-w-0">
+                  <span className="fieldset-legend">
                     {
-                      seen: 'Mark as read',
-                      flag: 'Star message',
-                      spam: 'Send to junk',
-                      delete: 'Do not store message'
-                    }[key]
-                  }
-                >
+                      {
+                        seen: 'Mark as read',
+                        flag: 'Star message',
+                        spam: 'Send to junk',
+                        delete: 'Do not store message'
+                      }[key]
+                    }
+                  </span>
                   <select
-                    className="input"
+                    className="select w-full"
                     value={draft.action[key] == null ? '' : String(draft.action[key])}
                     onChange={event =>
                       setDraft({
@@ -555,12 +605,13 @@ function Filters({ userId }: { userId: string }) {
                     <option value="true">Yes</option>
                     <option value="false">No</option>
                   </select>
-                </Field>
+                </label>
               ))}
             </div>
-            <Field label="Deliver to mailbox">
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">Deliver to mailbox</span>
               <select
-                className="input"
+                className="select w-full"
                 value={draft.action.mailbox || ''}
                 onChange={event =>
                   setDraft({ ...draft, action: { ...draft.action, mailbox: event.target.value } })
@@ -577,10 +628,13 @@ function Filters({ userId }: { userId: string }) {
                   </option>
                 ))}
               </select>
-            </Field>
-            <Field label="Forward to (one email address or URL per line)">
+            </label>
+            <label className="fieldset min-w-0">
+              <span className="fieldset-legend">
+                Forward to (one email address or URL per line)
+              </span>
               <textarea
-                className="input h-auto min-h-24 py-3"
+                className="textarea w-full h-auto min-h-24"
                 value={(draft.action.targets || []).join('\n')}
                 onChange={event =>
                   setDraft({
@@ -598,22 +652,30 @@ function Filters({ userId }: { userId: string }) {
                   })
                 }
               />
-            </Field>
+            </label>
             <div className="flex gap-3">
-              <Button loading={busy} className={button} type="submit">
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={busy}
+                aria-busy={Boolean(busy) || undefined}
+              >
+                {busy ? (
+                  <span aria-hidden="true" className="loading loading-spinner loading-xs" />
+                ) : null}
                 <Save className="h-4 w-4" />
                 {busy ? 'Saving…' : 'Save filter'}
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                className="text-sm font-semibold text-slate-600 dark:text-slate-300"
+                className="btn btn-ghost"
                 onClick={() => {
                   setDraft(null);
                   setEditing(undefined);
                 }}
               >
                 Cancel
-              </Button>
+              </button>
             </div>
           </fieldset>
         </form>
