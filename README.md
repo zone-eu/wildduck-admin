@@ -4,6 +4,40 @@ React, TypeScript, Tailwind CSS, and daisyUI admin UI for WildDuck, with a local
 
 You need a separately running WildDuck server with its HTTP API reachable from this backend and an API token with permissions for the operations you want to use. This project does not install or run WildDuck. Install dependencies from the project root. The `packages/` directory is not required to build or run the UI.
 
+## Screenshots
+
+### Light theme
+
+**Overview**
+
+![Overview dashboard showing API status, account totals, and quick actions](assets/screen5.png)
+
+**Users**
+
+![User management with account search, quotas, and status](assets/screen2.png)
+
+**DKIM**
+
+![DKIM key management with domain search and a key creation form](assets/screen3.png)
+
+**Administrator security**
+
+![Administrator security settings for authenticator apps, passkeys, and security keys](assets/screen4.png)
+
+**Overview without an API token**
+
+![Overview dashboard displaying the no API token indicator](assets/screen1.png)
+
+### Dark theme
+
+**Overview**
+
+![Overview dashboard in the dark theme](assets/screen6-dark.png)
+
+**User creation and details**
+
+![Dark theme user management with the new user form and selected account details](assets/screen7-dark.png)
+
 ## Configuration
 
 Configuration is loaded with `@zone-eu/wild-config`. Defaults live in `config/default.toml`. Override them with `--config=/path/to/admin-ui.toml`, `NODE_CONFIG_PATH`, or `APPCONF_*` environment variables.
