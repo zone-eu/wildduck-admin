@@ -35,7 +35,7 @@
   --radius-box: 1.25rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 1px;
+  --border: 2px;
   --depth: 1;
   --noise: 0;
 }
@@ -70,7 +70,7 @@
   --radius-box: 1.25rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 1px;
+  --border: 2px;
   --depth: 1;
   --noise: 0;
 }
@@ -78,9 +78,15 @@
 @theme {
   --font-sans: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Satoshi', ui-sans-serif, system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
 }
 
 @layer base {
+  html {
+    font-size: 17px;
+  }
+
   body {
     margin: 0;
     min-width: 320px;
@@ -94,7 +100,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -106,6 +111,22 @@
 }
 
 @layer utilities {
+  .card.border {
+    border-width: 2px;
+  }
+
+  .navbar.border-b {
+    border-bottom-width: 2px;
+  }
+
+  @media (hover: hover) {
+    .btn-error.btn-soft:not(:disabled):hover {
+      background-color: color-mix(in oklab, var(--color-error) 16%, var(--color-base-100));
+      border-color: color-mix(in oklab, var(--color-error) 30%, var(--color-base-100));
+      color: var(--color-error);
+      box-shadow: none;
+    }
+  }
 
   [data-theme='dark'] .text-primary,
   [data-theme='dark'] .btn-link,

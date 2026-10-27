@@ -291,13 +291,17 @@ function MailboxDetail({
   );
 }
 
-export function MailboxesView() {
-  const [userId, setUserId] = useState('');
+export function MailboxesView({ accountId }: { accountId: string }) {
+  const [userId, setUserId] = useState(accountId);
   const [loadedUserId, setLoadedUserId] = useState('');
   const [mailboxes, setMailboxes] = useState<MailboxItem[]>([]);
   const [selected, setSelected] = useState<MailboxItem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    load(accountId);
+  }, [accountId]);
 
   async function load(nextUserId = loadedUserId || userId) {
     const id = nextUserId.trim();
@@ -356,16 +360,7 @@ export function MailboxesView() {
 
       <div className="card border border-base-300 bg-base-100 p-4 shadow-xs">
         <form onSubmit={submit} noValidate className="flex flex-col gap-2 sm:flex-row sm:items-end">
-          <div className="min-w-0 flex-1">
-            <label className="fieldset min-w-0 py-0">
-              <span className="fieldset-legend">User ID</span>
-              <input
-                value={userId}
-                onChange={event => setUserId(event.target.value)}
-                className="input w-full"
-              />
-            </label>
-          </div>
+          <div className="min-w-0 flex-1"></div>
           <button
             type="submit"
             className="btn btn-outline mt-0 sm:self-end"

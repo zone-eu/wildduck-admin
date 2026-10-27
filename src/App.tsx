@@ -1,3 +1,7 @@
+import type { TaskResult } from './types';
+import { AccountWorkspace } from './views/AccountSelector';
+import { AccountControls } from './views/AccountControls';
+import { AddressRegister, AddressesView } from './views/AddressesView';
 import {
   PulseIcon as Activity,
   WarningCircleIcon as AlertCircle,
@@ -24,7 +28,7 @@ import {
   UsersIcon as Users,
   WebhooksLogoIcon as Webhook
 } from '@phosphor-icons/react';
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, Suspense, lazy, useEffect, useRef, useState } from 'react';
 import {
   createAddress,
   createDkimKey,
@@ -55,20 +59,57 @@ import type {
   UserListItem,
   UserUpdateInput
 } from './types';
-import { AdminSecuritySettings, AdminTwoFactorGate } from './views/AdminTwoFactorView';
-import { CertsView } from './views/CertsView';
-import { DomainAccessView } from './views/DomainAccessView';
-import { DomainAliasesView } from './views/DomainAliasesView';
 import { OverviewView } from './views/OverviewView';
-import { MailRulesView } from './views/MailRulesView';
-import { MailboxesView } from './views/MailboxesView';
-import { SecurityView } from './views/SecurityView';
-import { StorageView } from './views/StorageView';
-import { WebhooksView } from './views/WebhooksView';
 import { ConfirmDialog, CopyButton, formatBytes, formatDate } from './views/ui';
 import { ThemeToggle } from './views/ThemeToggle';
 
 import { readView, viewUrl, type View } from './navigation';
+
+const OperationsView = lazy(() =>
+  import('./views/OperationsView').then(module => ({ default: module.OperationsView }))
+);
+const CertsView = lazy(() =>
+  import('./views/CertsView').then(module => ({ default: module.CertsView }))
+);
+const DomainAccessView = lazy(() =>
+  import('./views/DomainAccessView').then(module => ({ default: module.DomainAccessView }))
+);
+const DomainAliasesView = lazy(() =>
+  import('./views/DomainAliasesView').then(module => ({ default: module.DomainAliasesView }))
+);
+const MailRulesView = lazy(() =>
+  import('./views/MailRulesView').then(module => ({ default: module.MailRulesView }))
+);
+const MailboxesView = lazy(() =>
+  import('./views/MailboxesView').then(module => ({ default: module.MailboxesView }))
+);
+const SecurityView = lazy(() =>
+  import('./views/SecurityView').then(module => ({ default: module.SecurityView }))
+);
+const StorageView = lazy(() =>
+  import('./views/StorageView').then(module => ({ default: module.StorageView }))
+);
+const WebhooksView = lazy(() =>
+  import('./views/WebhooksView').then(module => ({ default: module.WebhooksView }))
+);
+const AdminSecuritySettings = lazy(() =>
+  import('./views/AdminTwoFactorView').then(module => ({ default: module.AdminSecuritySettings }))
+);
+const AdminTwoFactorGate = lazy(() =>
+  import('./views/AdminTwoFactorView').then(module => ({ default: module.AdminTwoFactorGate }))
+);
+
+function ViewLoading() {
+  return (
+    <div
+      role="status"
+      className="flex items-center justify-center gap-2 p-6 text-sm text-base-content/60"
+    >
+      <span aria-hidden="true" className="loading loading-spinner loading-sm" />
+      Loading view…
+    </div>
+  );
+}
 
 const quotaChoices = [
   { label: 'Default', value: 0 },
@@ -197,6 +238,8 @@ function Shell({
   const nav = [
     { id: 'overview' as const, label: 'Overview', icon: Activity },
     { id: 'users' as const, label: 'Users', icon: Users },
+    { id: 'addresses' as const, label: 'Addresses', icon: Mail },
+    { id: 'operations' as const, label: 'Operations', icon: Server },
     { id: 'mailrules' as const, label: 'Mail rules', icon: Mail },
     { id: 'mailboxes' as const, label: 'Mailboxes', icon: Archive },
     { id: 'security' as const, label: 'Security', icon: Shield },
@@ -211,10 +254,10 @@ function Shell({
   const groups = [
     {
       label: 'Accounts',
-      ids: ['overview', 'users', 'mailboxes', 'mailrules', 'security', 'storage']
+      ids: ['overview', 'users', 'addresses', 'mailboxes', 'mailrules', 'security', 'storage']
     },
     { label: 'Domains', ids: ['dkim', 'domainaccess', 'domainaliases', 'certs'] },
-    { label: 'System', ids: ['webhooks', 'settings'] }
+    { label: 'System', ids: ['webhooks', 'operations', 'settings'] }
   ];
 
   function navigation(ids: string[]) {
@@ -300,7 +343,9 @@ function Shell({
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="min-w-0 px-3 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
+          <div className="mx-auto max-w-7xl">
+            <Suspense fallback={<ViewLoading />}>{children}</Suspense>
+          </div>
         </main>
       </div>
       <div className="drawer-side z-30">
@@ -377,7 +422,7 @@ function UsersView({
   onSelect: (user: UserListItem) => void;
   onCreated: (id: string) => void;
   onChanged: () => void;
-  onDeleted: (user: UserDetails) => void;
+  onDeleted: (user: UserDetails, result: TaskResult) => void;
   onAddressCreated: () => void;
   onSecurity: (id: string) => void;
 }) {
@@ -479,7 +524,7 @@ function UsersView({
                             event.stopPropagation();
                             onSelect(user);
                           }}
-                          className="btn btn-sm btn-outline"
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-sm text-left font-semibold hover:text-primary"
                         >
                           {selectingId === user.id ? (
                             <span aria-hidden="true" className="loading loading-spinner size-4" />
@@ -488,7 +533,7 @@ function UsersView({
                         </button>
                         <div className="text-xs text-base-content/60">{user.name || '-'}</div>
                         <div className="mt-1 flex items-center gap-1">
-                          <code className="select-all text-[11px] text-base-content/60">
+                          <code className="inline-flex min-h-8 items-center select-all text-[11px] leading-none text-base-content/60">
                             {user.id}
                           </code>
                           <CopyButton value={user.id} title={`Copy ${user.username} user ID`} />
@@ -728,7 +773,7 @@ function UserDetailPanel({
   user: UserDetails | null;
   addresses: AddressItem[];
   onChanged: () => void;
-  onDeleted: (user: UserDetails) => void;
+  onDeleted: (user: UserDetails, result: TaskResult) => void;
   onAddressCreated: () => void;
   onSecurity: (id: string) => void;
 }) {
@@ -754,6 +799,7 @@ function UserDetailPanel({
   const [pendingAddressDelete, setPendingAddressDelete] = useState<AddressItem | null>(null);
   const [pendingUserDelete, setPendingUserDelete] = useState(false);
   const [deletingUser, setDeletingUser] = useState(false);
+  const [deleteAfter, setDeleteAfter] = useState('');
   const status = userStatus(user || undefined);
   const quota = user?.limits?.quota || user?.quota;
 
@@ -771,7 +817,8 @@ function UserDetailPanel({
     setAddressError('');
     setPendingAddressDelete(null);
     setPendingUserDelete(false);
-  }, [user?.id]);
+    setDeleteAfter('');
+  }, [user]);
 
   async function saveUser(event: FormEvent) {
     event.preventDefault();
@@ -808,7 +855,7 @@ function UserDetailPanel({
     }
 
     const payload: UserUpdateInput = {
-      name: nameDraft.trim() || undefined,
+      name: nameDraft.trim(),
       quota: quotaValue,
       tags: tagsDraft
         .split(',')
@@ -828,6 +875,18 @@ function UserDetailPanel({
       payload.disable2fa = true;
     }
 
+    const baseline: UserUpdateInput = {
+      name: user.name || '',
+      quota: (user.limits?.quota || user.quota)?.allowed || 0,
+      tags: user.tags || [],
+      disabled: !!user.disabled,
+      suspended: !!user.suspended,
+      require2faEnabled: !!user.require2faEnabled,
+      spamLevel: user.spamLevel
+    };
+    for (const key of Object.keys(baseline) as (keyof UserUpdateInput)[]) {
+      if (JSON.stringify(payload[key]) === JSON.stringify(baseline[key])) delete payload[key];
+    }
     setSavingUser(true);
     try {
       await updateUser(user.id, payload);
@@ -911,9 +970,14 @@ function UserDetailPanel({
     setDeletingUser(true);
     setUserError('');
     try {
-      await deleteUser(user.id);
+      if (deleteAfter && new Date(deleteAfter).getTime() <= Date.now())
+        throw new Error('Retention date must be in the future');
+      const result = await deleteUser(
+        user.id,
+        deleteAfter ? new Date(deleteAfter).toISOString() : undefined
+      );
       setPendingUserDelete(false);
-      onDeleted(user);
+      onDeleted(user, { ...result, user: result.user || user.id });
     } catch (err) {
       setUserError(err instanceof Error ? err.message : 'User deletion failed');
     } finally {
@@ -950,7 +1014,9 @@ function UserDetailPanel({
         <div className="mb-4 card card-border rounded-box bg-base-200 p-3">
           <p className="mb-1 text-xs font-semibold text-base-content/60">User ID</p>
           <div className="flex items-center gap-2">
-            <code className="min-w-0 flex-1 select-all break-all text-xs">{user.id}</code>
+            <code className="flex min-h-8 min-w-0 flex-1 items-center select-all break-all text-xs leading-none">
+              {user.id}
+            </code>
             <CopyButton value={user.id} title="Copy user ID" />
           </div>
           <button type="button" className="btn btn-ghost mt-2" onClick={() => onSecurity(user.id)}>
@@ -1006,6 +1072,19 @@ function UserDetailPanel({
         </dl>
       </div>
 
+      <nav className="flex flex-wrap gap-2" aria-label="Account views">
+        {(['mailboxes', 'storage', 'mailrules', 'security'] as const).map(view => (
+          <a
+            key={view}
+            className="btn btn-sm btn-outline"
+            href={`/${view}?user=${encodeURIComponent(user.id)}`}
+          >
+            {view === 'mailrules' ? 'Mail rules' : view.charAt(0).toUpperCase() + view.slice(1)}
+          </a>
+        ))}
+      </nav>
+      <AccountControls user={user} onChanged={onChanged} />
+      <AddressRegister key={user.id} userId={user.id} />
       <form
         onSubmit={saveUser}
         noValidate
@@ -1043,7 +1122,7 @@ function UserDetailPanel({
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="fieldset min-w-0">
-              <span className="fieldset-legend">Quota bytes</span>
+              <span className="fieldset-legend">Quota bytes (zero uses default)</span>
               <input
                 value={quotaDraft}
                 onChange={event => setQuotaDraft(event.target.value)}
@@ -1295,7 +1374,28 @@ function UserDetailPanel({
         message={
           <>
             Delete <strong className="break-all text-base-content">{user.username}</strong> and its
-            mailbox data?
+            mailbox data?{' '}
+            {deleteAfter
+              ? `Data will be retained for recovery until ${new Date(deleteAfter).toLocaleString()}.`
+              : 'No recovery retention date has been set.'}
+            <label className="fieldset">
+              <span className="fieldset-legend">Retain deleted account data until (optional)</span>
+              <input
+                className="input w-full"
+                type="datetime-local"
+                value={deleteAfter}
+                onChange={event => setDeleteAfter(event.target.value)}
+              />
+            </label>
+            <p className="text-sm text-base-content/60">
+              Set a future date before deleting to allow recovery until then. Leave empty for native
+              immediate deletion.
+            </p>
+            {userError ? (
+              <span role="alert" className="block text-error">
+                {userError}
+              </span>
+            ) : null}
           </>
         }
         confirmLabel="Delete user"
@@ -2052,6 +2152,7 @@ export default function App() {
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
+  const [deletionResult, setDeletionResult] = useState<TaskResult>();
   const [users, setUsers] = useState<UserListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [nextCursor, setNextCursor] = useState<string | false>();
@@ -2059,7 +2160,6 @@ export default function App() {
   const [userQuery, setUserQuery] = useState('');
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDetails | null>(null);
-  const [securityUserId, setSecurityUserId] = useState('');
   const [selectingUserId, setSelectingUserId] = useState('');
   const userSelectionRequest = useRef(0);
   const [addresses, setAddresses] = useState<AddressItem[]>([]);
@@ -2080,11 +2180,6 @@ export default function App() {
     setNoticeState({ message, tone });
   }
   const [refreshingNotice, setRefreshingNotice] = useState('');
-
-  const activeUser = useMemo(
-    () => users.find(user => user.id === selectedUser?.id),
-    [selectedUser?.id, users]
-  );
 
   async function loadUsers(options: { query?: string; next?: string; previous?: string } = {}) {
     setLoadingUsers(true);
@@ -2144,10 +2239,10 @@ export default function App() {
       current.map(item =>
         item.key === setting.key
           ? {
-            ...item,
-            value,
-            custom: value !== item.default && !settingMatchesDefault({ ...item, value })
-          }
+              ...item,
+              value,
+              custom: value !== item.default && !settingMatchesDefault({ ...item, value })
+            }
           : item
       )
     );
@@ -2156,8 +2251,17 @@ export default function App() {
   }
 
   async function selectUser(user: UserListItem) {
+    if (readView(window.location.href) === 'users') {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('user') !== user.id) {
+        url.searchParams.set('user', user.id);
+        window.history.pushState(null, '', url);
+      }
+    }
     const request = ++userSelectionRequest.current;
     setSelectingUserId(user.id);
+    setSelectedUser(null);
+    setAddresses([]);
     try {
       const [detail, addressResponse] = await Promise.all([
         getUser(user.id),
@@ -2215,6 +2319,8 @@ export default function App() {
 
   useEffect(() => {
     const expire = () => {
+      ++userSelectionRequest.current;
+      setDeletionResult(undefined);
       setSession(null);
       setSelectedUser(null);
       setAddresses([]);
@@ -2242,6 +2348,23 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!session?.authenticated) return;
+    const restore = () => {
+      if (readView(window.location.href) !== 'users') return;
+      const id = new URL(window.location.href).searchParams.get('user');
+      if (id) selectUser({ id, username: '' });
+      else {
+        ++userSelectionRequest.current;
+        setSelectedUser(null);
+        setAddresses([]);
+      }
+    };
+    restore();
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, [session?.authenticated, view]);
+
+  useEffect(() => {
     if (!session?.authenticated) {
       return;
     }
@@ -2265,14 +2388,6 @@ export default function App() {
     return () => window.clearTimeout(timeout);
   }, [notice]);
 
-  useEffect(() => {
-    if (activeUser) {
-      setSelectedUser(current =>
-        current?.id === activeUser.id ? { ...current, ...activeUser } : current
-      );
-    }
-  }, [activeUser]);
-
   if (booting) {
     return (
       <main className="grid min-h-screen place-items-center bg-base-200 text-sm text-base-content/60">
@@ -2288,11 +2403,19 @@ export default function App() {
 
   async function handleLogout() {
     await logout().catch(() => undefined);
+    ++userSelectionRequest.current;
+    setSelectedUser(null);
+    setAddresses([]);
+    setDeletionResult(undefined);
     setSession(null);
   }
 
   if (!session.authenticated) {
-    return <AdminTwoFactorGate session={session} onSession={setSession} onLogout={handleLogout} />;
+    return (
+      <Suspense fallback={<ViewLoading />}>
+        <AdminTwoFactorGate session={session} onSession={setSession} onLogout={handleLogout} />
+      </Suspense>
+    );
   }
 
   return (
@@ -2349,6 +2472,26 @@ export default function App() {
         />
       ) : null}
 
+      {deletionResult ? (
+        <div className="card border border-base-300 bg-base-100 p-4 space-y-2">
+          <p>
+            Deletion request acknowledged. Save the account ID for recovery. A task ID acknowledges
+            scheduling.
+          </p>
+          <pre className="whitespace-pre-wrap break-all">
+            {JSON.stringify(deletionResult, null, 2)}
+          </pre>
+          {deletionResult.user ? (
+            <CopyButton value={deletionResult.user} title="Copy deleted account ID" />
+          ) : null}
+          {deletionResult.task ? (
+            <CopyButton value={deletionResult.task} title="Copy deletion task ID" />
+          ) : null}
+          <button className="btn btn-sm" onClick={() => setDeletionResult(undefined)}>
+            Dismiss
+          </button>
+        </div>
+      ) : null}
       {view === 'users' ? (
         <UsersView
           users={users}
@@ -2371,7 +2514,9 @@ export default function App() {
           onRefresh={() => runRefresh('Refreshing users...', () => loadUsers())}
           onSelect={selectUser}
           onSecurity={id => {
-            setSecurityUserId(id);
+            const url = new URL(window.location.href);
+            url.searchParams.set('user', id);
+            window.history.replaceState(null, '', url);
             setView('security');
           }}
           onCreated={id => {
@@ -2382,29 +2527,52 @@ export default function App() {
           onChanged={() => {
             setNotice('Updated user', 'success');
             loadUsers();
-            if (selectedUser) {
+            if (
+              selectedUser &&
+              new URL(window.location.href).searchParams.get('user') === selectedUser.id
+            ) {
               selectUser(selectedUser);
             }
           }}
-          onDeleted={user => {
+          onDeleted={(user, result) => {
+            setDeletionResult(result);
             setNotice(`Deleted user ${user.username}`, 'success');
-            setSelectedUser(null);
-            setAddresses([]);
+            const url = new URL(window.location.href);
+            if (url.searchParams.get('user') === user.id) {
+              ++userSelectionRequest.current;
+              setSelectedUser(null);
+              setAddresses([]);
+              url.searchParams.delete('user');
+              window.history.replaceState(null, '', url);
+            }
             loadUsers();
           }}
           onAddressCreated={() => {
-            if (selectedUser) {
+            if (
+              selectedUser &&
+              new URL(window.location.href).searchParams.get('user') === selectedUser.id
+            ) {
               selectUser(selectedUser);
             }
           }}
         />
       ) : null}
 
-      {view === 'mailrules' ? <MailRulesView /> : null}
+      {view === 'mailrules' ? (
+        <AccountWorkspace>{id => <MailRulesView accountId={id} />}</AccountWorkspace>
+      ) : null}
 
-      {view === 'mailboxes' ? <MailboxesView /> : null}
+      {view === 'mailboxes' ? (
+        <AccountWorkspace>{id => <MailboxesView accountId={id} />}</AccountWorkspace>
+      ) : null}
 
-      {view === 'security' ? <SecurityView initialUserId={securityUserId} /> : null}
+      {view === 'security' ? (
+        <AccountWorkspace>{id => <SecurityView accountId={id} />}</AccountWorkspace>
+      ) : null}
+      {view === 'addresses' ? <AddressesView /> : null}
+      {view === 'operations' ? (
+        <OperationsView exportTokenConfigured={session.api.exportTokenConfigured} />
+      ) : null}
 
       {view === 'dkim' ? (
         <DkimView
@@ -2433,7 +2601,9 @@ export default function App() {
 
       {view === 'certs' ? <CertsView /> : null}
 
-      {view === 'storage' ? <StorageView /> : null}
+      {view === 'storage' ? (
+        <AccountWorkspace>{id => <StorageView accountId={id} />}</AccountWorkspace>
+      ) : null}
 
       {view === 'webhooks' ? <WebhooksView /> : null}
 

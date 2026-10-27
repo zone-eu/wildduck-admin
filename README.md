@@ -54,6 +54,7 @@ passwordHash = "<paste the generated scrypt hash here>"
 [api]
 url = "http://127.0.0.1:8080"
 accessToken = ""
+exportAccessToken = "" # optional, used only for native import/export
 ```
 
 The admin login is local to this UI. WildDuck API calls use `api.accessToken` as `X-Access-Token`.
@@ -67,6 +68,20 @@ npm run password:hash
 The command prompts for a password without displaying it and prints a salted scrypt hash. Copy the entire `scrypt$...` line into `admin.auth.passwordHash` in your config override. For automation, the script also accepts a password from standard input. Avoid passing passwords as command arguments. Passwords must contain between 1 and 4096 UTF-8 bytes.
 
 `admin.sessionSecret` defaults to a random value generated at startup, so restarting signs out existing sessions. Set a persistent random secret when sessions must survive restarts. Sessions also depend on the configured administrator database. Set `admin.secureCookies = true` when serving over HTTPS.
+
+## Native administration workflows
+
+Mailboxes, Storage, Mail rules, and Security share a searchable, paginated account selector. The `user` URL parameter preserves the account on refresh and browser navigation. Account details link directly to each view.
+
+Account details support protocol restrictions, account forwarding, received/forwarded encryption, PGP public keys, S/MIME certificates and algorithms, and daily sending/forwarding limits. Zero uses WildDuck’s default limit. The API returns effective limits. Unchanged limits are omitted from updates so saving another setting preserves inherited defaults. Unknown disabled scopes and unchanged encryption settings are retained.
+
+**Addresses** provides a global address directory, address and forwarding-target search, native resolution (including optional wildcard matching), forwarded-address management, account address-register search/editing/disabling, and confirmed domain renaming with native modification counts. Disabled register entries disappear from native search results. Autoreply and metadata fields in the forwarded-address editor accept JSON objects.
+
+**Operations** exports all accounts or selects them by IDs or tags, imports native dumps, looks up and restores retained accounts by ID, and schedules global quota recalculation. Exports include account structure, settings and password hashes, but exclude email messages. Imports preserve existing entries. Both directions stream through the backend without buffering complete dumps there. Downloads are collected in browser memory. Canceling a transfer aborts the upstream request. It does not roll back entries already imported.
+
+WildDuck checks the role attached to each configured API token. Import/export requires `create:any` permission on both `export` and `import`. WildDuck’s built-in `export` role grants those operations. Set `api.exportAccessToken` to a token with that role. This token is used only for import/export. If it is empty, import/export is unavailable. The Operations page shows whether the dedicated token is configured, and the backend rejects transfer requests while it is missing. Keep `api.accessToken` authorized for the rest of the panel. Tokens stay on the server and are never sent to the browser. Native authorization errors and unavailable endpoint errors appear in the UI.
+
+Account deletion offers an optional retention date using `deleteAfter`. Save the returned account ID for a recovery lookup. Restore can recover only data still retained by WildDuck, and addresses already reused may be unavailable. Task IDs acknowledge native scheduling and do not report completion. The panel adds no task store or background progress API.
 
 ## Administrator database
 
@@ -172,7 +187,7 @@ npm run build
 npm run format:check
 ```
 
-Tests exercise salted password hashing, the hash CLI, startup validation, login/session behavior, and authenticated filter/autoreply forwarding using a local mock WildDuck API. They do not require a running WildDuck instance.
+Tests exercise salted password hashing, the hash CLI, startup validation, login/session behavior, and authenticated proxy contracts, including address/recovery operations and binary import/export integrity, using a local mock WildDuck API. They do not require a running WildDuck instance.
 
 Run `npm run format` to format the source, server, scripts, and tests with Prettier. The frontend uses two-space indentation. CommonJS server files, scripts, and tests use four spaces. `src/vite-env.d.ts` loads Vite's client types so TypeScript recognizes CSS and other asset imports.
 
