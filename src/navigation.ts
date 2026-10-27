@@ -1,6 +1,8 @@
 export const views = [
   'overview',
   'users',
+  'addresses',
+  'operations',
   'mailrules',
   'mailboxes',
   'security',

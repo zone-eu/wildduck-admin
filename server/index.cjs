@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('node:crypto');
+const { handleWorkflowRoutes } = require('./workflow-routes.cjs');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
@@ -33,7 +34,8 @@ const adminAuth = new AdminAuth(config, adminConfig);
 
 const wildduckApi = {
     url: String(config.api?.url || 'http://127.0.0.1:8080').replace(/\/+$/, ''),
-    accessToken: String(config.api?.accessToken || '')
+    accessToken: String(config.api?.accessToken || ''),
+    exportAccessToken: String(config.api?.exportAccessToken || '')
 };
 
 const mimeTypes = {
@@ -162,7 +164,8 @@ async function sessionPayload(session) {
         },
         api: {
             url: wildduckApi.url,
-            tokenConfigured: Boolean(wildduckApi.accessToken)
+            tokenConfigured: Boolean(wildduckApi.accessToken),
+            exportTokenConfigured: Boolean(wildduckApi.exportAccessToken)
         }
     };
 }
@@ -220,12 +223,12 @@ function appendQuery(pathname, sourceParams, allowed) {
     return query ? `${pathname}?${query}` : pathname;
 }
 
-function pick(input, keys) {
+function pick(input, keys, keepEmpty = false) {
     const output = {};
     for (const key of keys) {
         if (
             Object.prototype.hasOwnProperty.call(input, key) &&
-            input[key] !== '' &&
+            (keepEmpty || input[key] !== '') &&
             input[key] !== undefined
         ) {
             output[key] = input[key];
@@ -408,6 +411,17 @@ async function handleApi(req, res, url) {
         });
         return;
     }
+
+    if (
+        await handleWorkflowRoutes(req, res, url, {
+            readJson,
+            sendJson,
+            forward,
+            api: wildduckApi,
+            exportAccessToken: wildduckApi.exportAccessToken
+        })
+    )
+        return;
 
     if (url.pathname === '/api/health') {
         if (req.method !== 'GET') {
@@ -751,25 +765,39 @@ async function handleApi(req, res, url) {
                 });
                 return;
             }
-            const payload = pick(body, [
-                'name',
-                'quota',
-                'recipients',
-                'forwards',
-                'tags',
-                'disabled',
-                'suspended',
-                'require2faEnabled',
-                'disable2fa',
-                'spamLevel',
-                'metaData'
-            ]);
+            const payload = pick(
+                body,
+                [
+                    'name',
+                    'quota',
+                    'disabledScopes',
+                    'targets',
+                    'encryptMessages',
+                    'encryptForwarded',
+                    'pubKey',
+                    'smimeCerts',
+                    'smimeCipher',
+                    'smimeKeyTransport',
+                    'recipients',
+                    'forwards',
+                    'tags',
+                    'disabled',
+                    'suspended',
+                    'require2faEnabled',
+                    'disable2fa',
+                    'spamLevel',
+                    'metaData'
+                ],
+                true
+            );
             await forward(res, `/users/${user}`, { method: 'PUT', body: payload });
             return;
         }
 
         if (req.method === 'DELETE') {
-            await forward(res, `/users/${user}`, { method: 'DELETE' });
+            await forward(res, appendQuery(`/users/${user}`, url.searchParams, ['deleteAfter']), {
+                method: 'DELETE'
+            });
             return;
         }
 

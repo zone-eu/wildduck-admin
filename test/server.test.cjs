@@ -44,20 +44,35 @@ async function startAdminServer(configFile) {
     return { child, url };
 }
 
-test('hashed admin login, sessions, and mail-rule proxy contracts', { timeout: 20000 }, async t => {
+test('authenticated proxy and binary transfers', { timeout: 20000 }, async t => {
     // Record upstream requests to verify what the authenticated proxy forwards.
     const calls = [];
     const upstream = http.createServer(async (req, res) => {
-        let body = '';
-        for await (const chunk of req) {
-            body += chunk;
-        }
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const raw = Buffer.concat(chunks);
+        const body = raw.toString();
         calls.push({
             path: req.url,
             method: req.method,
             token: req.headers['x-access-token'],
-            body: body ? JSON.parse(body) : undefined
+            body: req.url === '/data/import' ? raw : body ? JSON.parse(body) : undefined
         });
+        if (req.url === '/data/export') {
+            if (calls.at(-1).body.tags?.includes('denied')) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Permission denied', code: 'AccessDenied' }));
+            } else {
+                res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
+                res.end(Buffer.from([0, 255, 13, 10, 128, 1]));
+            }
+            return;
+        }
+        if (req.url === '/data/import') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ entries: 8, imported: 4, failed: 1, existing: 3 }));
+            return;
+        }
         res.writeHead(req.url.endsWith('/missing') ? 404 : 200, {
             'Content-Type': 'application/json'
         });
@@ -88,7 +103,10 @@ test('hashed admin login, sessions, and mail-rule proxy contracts', { timeout: 2
                 host: '127.0.0.1',
                 port: 0,
                 sessionSecret: 'test-session-secret',
-                auth: { username: 'operator', passwordHash: await hashPassword('correct password') }
+                auth: {
+                    username: 'operator',
+                    passwordHash: await hashPassword('correct password')
+                }
             },
             api: {
                 url: `http://127.0.0.1:${upstream.address().port}`,
@@ -159,7 +177,15 @@ test('hashed admin login, sessions, and mail-rule proxy contracts', { timeout: 2
         path: '/users/user/autoreply',
         method: 'PUT',
         token: 'test-upstream-token',
-        body: { status: false, name: '', subject: '', text: '', html: '', start: false, end: false }
+        body: {
+            status: false,
+            name: '',
+            subject: '',
+            text: '',
+            html: '',
+            start: false,
+            end: false
+        }
     });
     const rule = {
         name: 'Sort mail',
@@ -203,6 +229,163 @@ test('hashed admin login, sessions, and mail-rule proxy contracts', { timeout: 2
         (await request('/api/users/user/autoreply', 'GET', undefined, cookie)).status,
         200
     );
+    // New native workflows share the authenticated session boundary.
+    for (const route of [
+        '/api/addresses',
+        '/api/addresses/forwarded/id',
+        '/api/users/id/restore',
+        '/api/data/export',
+        '/api/data/import',
+        '/api/quota/reset'
+    ]) {
+        assert.equal((await request(route)).status, 401);
+    }
+    const contracts = [
+        [
+            '/api/addresses?query=alice&forward=example&limit=25&next=cursor&accessToken=injected',
+            'GET',
+            undefined,
+            '/addresses?query=alice&forward=example&limit=25&next=cursor'
+        ],
+        [
+            '/api/addresses/resolve/a%2Bb%40example.com?allowWildcard=true&bad=1',
+            'GET',
+            undefined,
+            '/addresses/resolve/a%2Bb%40example.com?allowWildcard=true'
+        ],
+        [
+            '/api/addresses/forwarded',
+            'POST',
+            {
+                address: '*@example.com',
+                targets: ['smtp://relay:25'],
+                allowWildcard: true,
+                bad: 1
+            },
+            '/addresses/forwarded',
+            { address: '*@example.com', targets: ['smtp://relay:25'], allowWildcard: true }
+        ],
+        ['/api/addresses/forwarded/id', 'GET', undefined, '/addresses/forwarded/id'],
+        [
+            '/api/addresses/forwarded/id',
+            'PUT',
+            {
+                targets: [],
+                name: '',
+                forwards: 0,
+                forwardedDisabled: false,
+                autoreply: { status: false },
+                tags: [],
+                metaData: {},
+                bad: 1
+            },
+            '/addresses/forwarded/id',
+            {
+                targets: [],
+                name: '',
+                forwards: 0,
+                forwardedDisabled: false,
+                autoreply: { status: false },
+                tags: [],
+                metaData: {}
+            }
+        ],
+        ['/api/addresses/forwarded/id', 'DELETE', undefined, '/addresses/forwarded/id'],
+        [
+            '/api/addresses/renameDomain',
+            'PUT',
+            { oldDomain: 'old.test', newDomain: 'new.test', bad: 1 },
+            '/addresses/renameDomain',
+            { oldDomain: 'old.test', newDomain: 'new.test' }
+        ],
+        [
+            '/api/users/id/addressregister?query=ali&limit=100&bad=1',
+            'GET',
+            undefined,
+            '/users/id/addressregister?query=ali&limit=100'
+        ],
+        [
+            '/api/users/id/addressregister/entry',
+            'PUT',
+            { disabled: true, name: 'Alice', bad: 1 },
+            '/users/id/addressregister/entry',
+            { disabled: true, name: 'Alice' }
+        ],
+        ['/api/users/id/restore', 'GET', undefined, '/users/id/restore'],
+        ['/api/users/id/restore', 'POST', { bad: 1 }, '/users/id/restore', {}],
+        ['/api/quota/reset', 'POST', { bad: 1 }, '/quota/reset', {}],
+        [
+            '/api/users/id',
+            'PUT',
+            {
+                disabledScopes: ['imap', 'future'],
+                targets: [],
+                encryptMessages: false,
+                encryptForwarded: true,
+                pubKey: '',
+                smimeCerts: [],
+                recipients: 0,
+                forwards: 0,
+                bad: 1
+            },
+            '/users/id',
+            {
+                disabledScopes: ['imap', 'future'],
+                targets: [],
+                encryptMessages: false,
+                encryptForwarded: true,
+                pubKey: '',
+                smimeCerts: [],
+                recipients: 0,
+                forwards: 0
+            }
+        ],
+        [
+            '/api/users/id?deleteAfter=2030-01-01T00%3A00%3A00Z&bad=1',
+            'DELETE',
+            undefined,
+            '/users/id?deleteAfter=2030-01-01T00%3A00%3A00Z'
+        ]
+    ];
+    for (const [route, method, input, upstreamPath, expected] of contracts) {
+        assert.equal((await request(route, method, input, cookie)).status, 200, route);
+        assert.deepEqual(calls.at(-1), {
+            path: upstreamPath,
+            method,
+            token: 'test-upstream-token',
+            body: expected
+        });
+    }
+    assert.equal((await request('/api/addresses', 'DELETE', undefined, cookie)).status, 405);
+    assert.equal((await request('/api/addresses/forwarded', 'POST', null, cookie)).status, 400);
+    assert.equal(
+        (await request('/api/addresses/forwarded/missing', 'GET', undefined, cookie)).status,
+        404
+    );
+    const dump = await request('/api/data/export', 'POST', { users: ['id'], bad: 1 }, cookie);
+    assert.equal(dump.status, 200);
+    assert.match(dump.headers.get('content-disposition'), /attachment/);
+    assert.deepEqual(Buffer.from(await dump.arrayBuffer()), Buffer.from([0, 255, 13, 10, 128, 1]));
+    assert.deepEqual(calls.at(-1).body, { users: ['id'] });
+    const denied = await request('/api/data/export', 'POST', { tags: ['denied'] }, cookie);
+    assert.equal(denied.status, 403);
+    assert.deepEqual(await denied.json(), { error: 'Permission denied', code: 'AccessDenied' });
+    const binary = Buffer.alloc(1024 * 1024 + 7, 255);
+    binary.set([0, 13, 10, 128, 1]);
+    const imported = await fetch(url + '/api/data/import', {
+        method: 'POST',
+        headers: { Cookie: cookie, 'Content-Type': 'application/octet-stream' },
+        body: binary
+    });
+    assert.equal(imported.status, 200);
+    assert.deepEqual(await imported.json(), {
+        entries: 8,
+        imported: 4,
+        failed: 1,
+        existing: 3
+    });
+    assert.deepEqual(calls.at(-1).body, binary);
+    assert.equal(calls.at(-1).token, 'test-upstream-token');
     // Logout clears the browser's session cookie.
     const logout = await request('/api/logout', 'POST', undefined, cookie);
     assert.match(logout.headers.get('set-cookie'), /Max-Age=0/);

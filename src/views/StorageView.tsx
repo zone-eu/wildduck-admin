@@ -6,13 +6,13 @@ import {
   MagnifyingGlassIcon as Search,
   TrashIcon as Trash2
 } from '@phosphor-icons/react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { deleteStoredFile, getStoredFiles } from '../api';
 import type { StoredFile } from '../types';
 import { ConfirmDialog, formatBytes, formatDate } from './ui';
 
-export function StorageView() {
-  const [userId, setUserId] = useState('');
+export function StorageView({ accountId }: { accountId: string }) {
+  const [userId, setUserId] = useState(accountId);
   const [loadedUserId, setLoadedUserId] = useState('');
   const [query, setQuery] = useState('');
   const [activeQuery, setActiveQuery] = useState('');
@@ -24,6 +24,10 @@ export function StorageView() {
   const [error, setError] = useState('');
   const [pendingDelete, setPendingDelete] = useState<StoredFile | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    load({ user: accountId });
+  }, [accountId]);
 
   async function load(
     options: { user?: string; query?: string; next?: string; previous?: string } = {}
@@ -114,14 +118,6 @@ export function StorageView() {
           noValidate
           className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end"
         >
-          <label className="fieldset min-w-0 py-0">
-            <span className="fieldset-legend">User ID</span>
-            <input
-              value={userId}
-              onChange={event => setUserId(event.target.value)}
-              className="input w-full"
-            />
-          </label>
           <label className="fieldset min-w-0 py-0">
             <span className="fieldset-legend">Search</span>
             <div className="relative flex items-center">

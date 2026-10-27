@@ -1,4 +1,14 @@
 import type {
+  Page,
+  DirectoryAddress,
+  ForwardedAddress,
+  ForwardedAddressInput,
+  RenameResult,
+  TaskResult,
+  RecoveryInfo,
+  ImportResult
+} from './types';
+import type {
   AdminTwoFactorStatus,
   AutoreplyInput,
   FilterInput,
@@ -154,8 +164,18 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     window.dispatchEvent(new Event('admin-two-factor-required'));
   }
   if (!response.ok || payload.success === false) {
-    const error = new Error(payload.error || response.statusText) as Error & { status?: number };
+    const error = new Error(
+      [
+        payload.error || response.statusText,
+        payload.code,
+        typeof payload.detail === 'string' ? payload.detail : ''
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    ) as Error & { status?: number; code?: string; detail?: unknown };
     error.status = response.status;
+    error.code = payload.code;
+    error.detail = payload.detail;
     throw error;
   }
 
@@ -251,10 +271,13 @@ export function resetUserQuota(userId: string) {
   });
 }
 
-export function deleteUser(userId: string) {
-  return apiFetch<{ success: boolean; task?: string }>(`/api/users/${encodeURIComponent(userId)}`, {
-    method: 'DELETE'
-  });
+export function deleteUser(userId: string, deleteAfter?: string) {
+  return apiFetch<TaskResult>(
+    `/api/users/${encodeURIComponent(userId)}${deleteAfter ? `?${new URLSearchParams({ deleteAfter })}` : ''}`,
+    {
+      method: 'DELETE'
+    }
+  );
 }
 
 export function getAddresses(userId: string) {
@@ -613,4 +636,98 @@ export function deleteWebhook(id: string) {
   return apiFetch<{ success: boolean }>(`/api/webhooks/${encodeURIComponent(id)}`, {
     method: 'DELETE'
   });
+}
+
+function queryString(params: Record<string, string | number | boolean | undefined>) {
+  return new URLSearchParams(
+    Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== '')
+      .map(([k, v]) => [k, String(v)])
+  ).toString();
+}
+export function getAddressDirectory(params: {
+  query?: string;
+  forward?: string;
+  limit?: number;
+  next?: string;
+  previous?: string;
+}) {
+  return apiFetch<Page<DirectoryAddress>>(`/api/addresses?${queryString(params)}`);
+}
+export function resolveAddress(address: string, allowWildcard: boolean) {
+  return apiFetch<ForwardedAddress>(
+    `/api/addresses/resolve/${encodeURIComponent(address)}?${queryString({ allowWildcard })}`
+  );
+}
+export function getForwardedAddress(id: string) {
+  return apiFetch<ForwardedAddress>(`/api/addresses/forwarded/${encodeURIComponent(id)}`);
+}
+export function saveForwardedAddress(input: ForwardedAddressInput, id?: string) {
+  return apiFetch<{ success: boolean; id?: string }>(
+    `/api/addresses/forwarded${id ? `/${encodeURIComponent(id)}` : ''}`,
+    { method: id ? 'PUT' : 'POST', body: JSON.stringify(input) }
+  );
+}
+export function deleteForwardedAddress(id: string) {
+  return apiFetch<{ success: boolean }>(`/api/addresses/forwarded/${encodeURIComponent(id)}`, {
+    method: 'DELETE'
+  });
+}
+export function renameAddressDomain(oldDomain: string, newDomain: string) {
+  return apiFetch<RenameResult>('/api/addresses/renameDomain', {
+    method: 'PUT',
+    body: JSON.stringify({ oldDomain, newDomain })
+  });
+}
+export function getAddressRegister(user: string, query: string) {
+  return apiFetch<AddressesResponse>(
+    `/api/users/${encodeURIComponent(user)}/addressregister?${queryString({ query, limit: 100 })}`
+  );
+}
+export function updateAddressRegister(
+  user: string,
+  id: string,
+  input: { name?: string; disabled: boolean }
+) {
+  return apiFetch<{ success: boolean }>(
+    `/api/users/${encodeURIComponent(user)}/addressregister/${encodeURIComponent(id)}`,
+    { method: 'PUT', body: JSON.stringify(input) }
+  );
+}
+export function getRecoveryInfo(user: string) {
+  return apiFetch<RecoveryInfo>(`/api/users/${encodeURIComponent(user)}/restore`);
+}
+export function restoreUser(user: string) {
+  return apiFetch<TaskResult>(`/api/users/${encodeURIComponent(user)}/restore`, { method: 'POST' });
+}
+export function resetGlobalQuota() {
+  return apiFetch<TaskResult>('/api/quota/reset', { method: 'POST' });
+}
+export function importData(file: File, signal?: AbortSignal) {
+  return apiFetch<ImportResult>('/api/data/import', {
+    method: 'POST',
+    body: file,
+    headers: { 'Content-Type': 'application/octet-stream' },
+    signal
+  });
+}
+export async function exportData(
+  input: { users?: string[]; tags?: string[] },
+  signal?: AbortSignal
+) {
+  const response = await fetch('/api/data/export', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Request': '1' },
+    body: JSON.stringify(input),
+    signal
+  });
+  if (!response.ok || response.headers.get('content-type')?.includes('application/json')) {
+    const payload = await response.json().catch(() => ({}));
+    if (response.status === 401 && payload.error === 'Authentication required')
+      window.dispatchEvent(new Event('admin-session-expired'));
+    if (payload.code === 'AdminTwoFactorRequired')
+      window.dispatchEvent(new Event('admin-two-factor-required'));
+    throw new Error(payload.error || response.statusText);
+  }
+  return response.blob();
 }

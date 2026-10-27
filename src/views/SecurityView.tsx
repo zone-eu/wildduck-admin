@@ -17,8 +17,8 @@ function resultTone(result?: string) {
   return result === 'success' ? 'success' : result ? 'danger' : 'muted';
 }
 
-export function SecurityView({ initialUserId = '' }: { initialUserId?: string }) {
-  const [userId, setUserId] = useState(initialUserId);
+export function SecurityView({ accountId }: { accountId: string }) {
+  const [userId, setUserId] = useState(accountId);
   const [loadedUserId, setLoadedUserId] = useState('');
   const [actionFilter, setActionFilter] = useState('');
   const [events, setEvents] = useState<AuthLogItem[]>([]);
@@ -30,6 +30,10 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
   const [error, setError] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const [quotaResult, setQuotaResult] = useState('');
+
+  useEffect(() => {
+    load({ user: accountId });
+  }, [accountId]);
 
   async function load(
     options: { next?: string; previous?: string; action?: string; user?: string } = {}
@@ -67,12 +71,6 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    if (initialUserId) {
-      load({ user: initialUserId });
-    }
-  }, [initialUserId]);
 
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -127,15 +125,6 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
           className="grid gap-3 md:grid-cols-[minmax(0,1fr)_260px_auto] md:items-end"
         >
           <label className="fieldset min-w-0 py-0">
-            <span className="fieldset-legend">User ID</span>
-            <input
-              value={userId}
-              onChange={event => setUserId(event.target.value)}
-              className="input w-full"
-              placeholder="Paste a user ID from Users"
-            />
-          </label>
-          <label className="fieldset min-w-0 py-0">
             <span className="fieldset-legend">Action filter</span>
             <input
               value={actionFilter}
@@ -161,7 +150,7 @@ export function SecurityView({ initialUserId = '' }: { initialUserId?: string })
 
       {!loadedUserId ? (
         <p className="text-sm text-base-content/60">
-          Copy an ID from Users, or choose “Open security log” in the account details.
+          Select an account above to view security details.
         </p>
       ) : null}
       {error ? (

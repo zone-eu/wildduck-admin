@@ -10,6 +10,7 @@ export type SessionResponse = {
   api: {
     url: string;
     tokenConfigured: boolean;
+    exportTokenConfigured: boolean;
   };
 };
 
@@ -55,8 +56,16 @@ export type UserDetails = UserListItem & {
   success: boolean;
   limits?: {
     quota?: Quota;
+    recipients?: Quota;
+    forwards?: Quota;
   };
   disabledScopes?: string[];
+  encryptMessages?: boolean;
+  encryptForwarded?: boolean;
+  pubKey?: string;
+  smimeCerts?: string[];
+  smimeCipher?: string;
+  smimeKeyTransport?: string;
   autoreply?: boolean;
   require2faEnabled?: boolean;
   requirePasswordChange?: boolean;
@@ -219,6 +228,14 @@ export type TlsCertificateInput = {
 };
 
 export type UserUpdateInput = {
+  disabledScopes?: string[];
+  targets?: string[];
+  encryptMessages?: boolean;
+  encryptForwarded?: boolean;
+  pubKey?: string;
+  smimeCerts?: string[];
+  smimeCipher?: string;
+  smimeKeyTransport?: string;
   name?: string;
   quota?: number;
   recipients?: number;
@@ -377,3 +394,54 @@ export interface FilterItem {
   query: [string, string | number | null][];
   action: [string, string | number | null][];
 }
+
+export type Page<T> = {
+  success: boolean;
+  total: number;
+  page?: number;
+  nextCursor?: string | false;
+  previousCursor?: string | false;
+  results: T[];
+};
+export type DirectoryAddress = AddressItem & { user?: string; metaData?: Record<string, unknown> };
+export type ForwardedAddressInput = {
+  address?: string;
+  name?: string;
+  targets?: string[];
+  allowWildcard?: boolean;
+  forwards?: number;
+  forwardedDisabled?: boolean;
+  autoreply?: Partial<AutoreplyInput>;
+  tags?: string[];
+  metaData?: Record<string, unknown>;
+};
+export type ForwardedAddress = DirectoryAddress & {
+  success: boolean;
+  limits?: { forwards?: Quota };
+  autoreply?: Partial<AutoreplyInput>;
+};
+export type RenameResult = {
+  success: boolean;
+  modifiedAddresses: number;
+  modifiedUsers: number;
+  modifiedDkim: number;
+  modifiedAliases: number;
+};
+export type TaskResult = {
+  success: boolean;
+  code?: string;
+  user?: string;
+  task?: string;
+  deleteAfter?: string | false;
+  addresses?: { deleted?: number; recovered?: number; main?: string };
+};
+export type RecoveryInfo = {
+  success: boolean;
+  user: string;
+  username?: string;
+  storageUsed?: number;
+  tags?: string[];
+  deleted?: string;
+  recoverableAddresses?: string[];
+};
+export type ImportResult = { entries: number; imported: number; failed: number; existing: number };

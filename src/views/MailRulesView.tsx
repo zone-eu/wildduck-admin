@@ -11,11 +11,10 @@ import {
   getFilter,
   getFilters,
   getMailboxes,
-  getUsers,
   saveAutoreply,
   saveFilter
 } from '../api';
-import type { AutoreplyInput, FilterInput, FilterItem, MailboxItem, UserListItem } from '../types';
+import type { AutoreplyInput, FilterInput, FilterItem, MailboxItem } from '../types';
 import { ConfirmDialog } from './ui';
 
 const emptyReply: AutoreplyInput = {
@@ -31,108 +30,26 @@ const emptyFilter = (): FilterInput => ({ name: '', disabled: false, query: {}, 
 const panel = 'card border border-base-300 bg-base-100 p-5 shadow-xs';
 const errorMessage = (err: unknown) => (err instanceof Error ? err.message : 'Request failed');
 
-export function MailRulesView() {
-  const [query, setQuery] = useState('');
-  const [users, setUsers] = useState<UserListItem[]>([]);
-  const [user, setUser] = useState<UserListItem | null>(null);
+export function MailRulesView({ accountId }: { accountId: string }) {
   const [tab, setTab] = useState<'filters' | 'autoreply'>('filters');
-  const [error, setError] = useState('');
-  const [searching, setSearching] = useState(false);
-
-  useEffect(() => {
-    let current = true;
-    const timeout = setTimeout(() => {
-      setSearching(true);
-      getUsers({ query, limit: 25 })
-        .then(response => {
-          if (current) {
-            setUsers(response.results || []);
-            setError('');
-          }
-        })
-        .catch(err => {
-          if (current) {
-            setError(errorMessage(err));
-          }
-        })
-        .finally(() => {
-          if (current) {
-            setSearching(false);
-          }
-        });
-    }, 250);
-    return () => {
-      current = false;
-      clearTimeout(timeout);
-    };
-  }, [query]);
-
   return (
     <section className="space-y-5">
-      <div>
-        <h2 className="font-display text-2xl font-semibold">Mail rules</h2>
-        <p className="text-sm text-base-content/60">
-          Manage incoming mail filters and vacation replies for an account.
-        </p>
-      </div>
-      <div className={`${panel} grid gap-4 sm:grid-cols-2`}>
-        <label className="fieldset min-w-0">
-          <span className="fieldset-legend">Search accounts</span>
-          <input
-            className="input w-full"
-            placeholder="Username or email address"
-            value={query}
-            onChange={event => setQuery(event.target.value)}
-          />
-        </label>
-        <label className="fieldset min-w-0">
-          <span className="fieldset-legend">Account</span>
-          <select
-            className="select w-full"
-            value={user?.id || ''}
-            onChange={event => setUser(users.find(item => item.id === event.target.value) || null)}
-          >
-            <option value="">{searching ? 'Searching…' : 'Select an account'}</option>
-            {user && !users.some(item => item.id === user.id) ? (
-              <option value={user.id}>
-                {user.username} · {user.address}
-              </option>
-            ) : null}
-            {users.map(item => (
-              <option key={item.id} value={item.id}>
-                {item.username} · {item.address}
-              </option>
-            ))}
-          </select>
-        </label>
-        {error ? (
-          <div role="alert" className="alert alert-error alert-soft">
-            <span className="min-w-0 break-words">{error}</span>
-          </div>
-        ) : null}
-      </div>
-      <div role="tablist" className="tabs tabs-box w-fit" aria-label="Mail rule type">
+      <h2 className="font-display text-2xl font-semibold">Mail rules</h2>
+      <div className="tabs tabs-box">
         {(['filters', 'autoreply'] as const).map(item => (
           <button
             key={item}
-            type="button"
-            role="tab"
-            aria-selected={tab === item}
-            onClick={() => setTab(item)}
             className={`tab ${tab === item ? 'tab-active' : ''}`}
+            onClick={() => setTab(item)}
           >
             {item === 'filters' ? 'Incoming mail filters' : 'Vacation reply'}
           </button>
         ))}
       </div>
-      {!user ? (
-        <div className={`${panel} py-12 text-center text-base-content/60`}>
-          Select an account to manage its mail rules.
-        </div>
-      ) : tab === 'filters' ? (
-        <Filters key={user.id} userId={user.id} />
+      {tab === 'filters' ? (
+        <Filters key={accountId} userId={accountId} />
       ) : (
-        <Autoreply key={user.id} userId={user.id} />
+        <Autoreply key={accountId} userId={accountId} />
       )}
     </section>
   );
@@ -154,13 +71,15 @@ function Autoreply({ userId }: { userId: string }) {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [saved, setSaved] = useState(false);
+  const [savedReply, setSavedReply] = useState<AutoreplyInput | null>(null);
   useEffect(() => {
     let current = true;
     getAutoreply(userId)
       .then(data => {
         if (current) {
-          setReply({ ...emptyReply, ...data });
+          const loaded = { ...emptyReply, ...data };
+          setReply(loaded);
+          setSavedReply(loaded);
           setReady(true);
         }
       })
@@ -175,12 +94,10 @@ function Autoreply({ userId }: { userId: string }) {
   }, [userId]);
   function update<K extends keyof AutoreplyInput>(key: K, value: AutoreplyInput[K]) {
     setReply(current => ({ ...current, [key]: value }));
-    setSaved(false);
   }
   async function submit(event: FormEvent) {
     event.preventDefault();
     setError('');
-    setSaved(false);
     if (reply.status && !reply.text.trim() && !reply.html.trim()) {
       setError('Enter a reply message before enabling vacation replies.');
       return;
@@ -192,7 +109,7 @@ function Autoreply({ userId }: { userId: string }) {
     setBusy(true);
     try {
       await saveAutoreply(userId, reply);
-      setSaved(true);
+      setSavedReply({ ...reply });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -212,6 +129,48 @@ function Autoreply({ userId }: { userId: string }) {
       {error ? (
         <div role="alert" className="alert alert-error alert-soft">
           <span className="min-w-0 break-words">{error}</span>
+        </div>
+      ) : null}
+      {ready ? (
+        <div
+          className="rounded-lg border border-base-300 bg-base-200 p-4"
+          aria-label="Vacation reply preview"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold">Reply preview</span>
+            <span
+              className={`badge badge-sm badge-soft ${reply.status ? 'badge-success' : 'badge-ghost'}`}
+            >
+              {reply.status ? 'Automatic replies enabled' : 'Automatic replies disabled'}
+            </span>
+            {savedReply && JSON.stringify(reply) !== JSON.stringify(savedReply) ? (
+              <span className="badge badge-sm badge-warning badge-soft">Unsaved changes</span>
+            ) : null}
+          </div>
+          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-base-content/60">From</dt>
+              <dd className="break-words">{reply.name || 'Account name'}</dd>
+            </div>
+            <div>
+              <dt className="text-base-content/60">Subject</dt>
+              <dd className="break-words">{reply.subject || '(no subject)'}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-base-content/60">Schedule</dt>
+              <dd>
+                {reply.start || reply.end
+                  ? `${reply.start ? `Starts ${new Date(reply.start).toLocaleString()}` : 'No start date'}${reply.end ? ` · Ends ${new Date(reply.end).toLocaleString()}` : ''}`
+                  : 'No start or end date'}
+              </dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-base-content/60">Message</dt>
+              <dd className="mt-1 whitespace-pre-wrap break-words">
+                {reply.text || (reply.html ? 'HTML message is set.' : 'No message entered yet.')}
+              </dd>
+            </div>
+          </dl>
         </div>
       ) : null}
       <fieldset disabled={!ready || busy} className="space-y-4 disabled:opacity-60">
@@ -292,11 +251,6 @@ function Autoreply({ userId }: { userId: string }) {
       {!ready && !error ? (
         <p role="status" className="text-sm text-base-content/60">
           Loading vacation reply…
-        </p>
-      ) : null}
-      {saved ? (
-        <p role="status" className="text-sm text-success">
-          Vacation reply saved.
         </p>
       ) : null}
     </form>
@@ -471,32 +425,32 @@ function Filters({ userId }: { userId: string }) {
           filters.map(item => (
             <div
               key={item.id}
-              className={`flex items-start justify-between gap-3 rounded-lg border p-4 ${editing === item.id ? 'border-primary bg-primary/10' : 'border-base-300'}`}
+              className={`grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-lg border-2 p-4 ${editing === item.id ? 'border-primary bg-primary/10' : 'border-base-300'}`}
             >
               <button
                 type="button"
                 onClick={() => edit(item)}
-                className="btn btn-ghost !block min-w-0 flex-1 text-left"
+                className="block min-w-0 w-full cursor-pointer rounded-md p-2 text-left whitespace-normal [overflow-wrap:anywhere] transition-colors hover:bg-base-200 disabled:cursor-wait disabled:opacity-60"
                 disabled={busy || selectingId === item.id}
                 aria-busy={Boolean(selectingId === item.id) || undefined}
               >
                 {selectingId === item.id ? (
                   <span aria-hidden="true" className="loading loading-spinner loading-xs" />
                 ) : null}
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{item.name || 'Unnamed filter'}</span>
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="min-w-0 font-semibold">{item.name || 'Unnamed filter'}</span>
                   <span
-                    className={`badge badge-sm badge-soft ${item.disabled ? 'badge-ghost' : 'badge-success'}`}
+                    className={`badge badge-sm badge-soft shrink-0 ${item.disabled ? 'badge-ghost' : 'badge-success'}`}
                   >
                     {item.disabled ? 'Disabled' : 'Enabled'}
                   </span>
-                </div>
-                <p className="mt-2 break-words text-sm text-base-content/60">
+                </span>
+                <span className="mt-2 block text-sm text-base-content/60">
                   {item.query.map(parts => parts.join(': ')).join(' · ') || 'All incoming messages'}
-                </p>
-                <p className="mt-1 break-words text-sm text-base-content/80">
+                </span>
+                <span className="mt-1 block text-sm text-base-content/80">
                   {item.action.map(parts => parts.join(': ')).join(' · ') || 'No actions'}
-                </p>
+                </span>
               </button>
               <button
                 title={`Delete ${item.name || 'filter'}`}

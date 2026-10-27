@@ -18,6 +18,8 @@ passwordHash = ""
 [api]
 url = "http://127.0.0.1:8080"
 accessToken = ""
+# Required for native data import and export. Use a WildDuck token with the export role.
+exportAccessToken = ""
 
 [dbs]
 # Administrator credentials, sessions, and challenges. Separate from WildDuck's database.
