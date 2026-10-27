@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/zone-eu/wildduck-admin/compare/v0.1.4...v0.2.0) (2026-10-27)
+
+
+### Features
+
+* expand native WildDuck admin workflows ([#9](https://github.com/zone-eu/wildduck-admin/issues/9)) ([a98f391](https://github.com/zone-eu/wildduck-admin/commit/a98f39112b5fd4ab207c0612a15fcf8010a29865))
+
 ## [0.1.4](https://github.com/zone-eu/wildduck-admin/compare/v0.1.3...v0.1.4) (2026-10-16)
 
 
